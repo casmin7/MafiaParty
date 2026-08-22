@@ -6,3 +6,10 @@
 body {
     background: var(--bg-color);
 }
+
+#playerList {
+    li {
+        list-style: none;
+
+    }
+}

@@ -57,3 +57,8 @@ body {
 .hiddenInfo.revealed {
   visibility: visible;
 }
+
+/* CSS based on roles/states */
+.player-card[data-role="eliminated"] {
+    cursor: not-allowed;
+}

@@ -9,7 +9,14 @@
 <body>
     <div id="playerList">
     </div>
-<button onclick="addPlayer()">Add Player</button>
+
+<div id="setup_div">
+    <button onclick="addPlayer()">Add Player</button>
+    <input type="number" value="2" id="mafiaCount">
+    <input type="number" value="1" id="detectiveCount">
+    <input type="number" value="1" id="doctorCount">
+</div>
+<button onclick="nextStage()">Next Stage</button>
 <script src="script.js"></script>
 </body>
 </html>

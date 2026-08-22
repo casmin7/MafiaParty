@@ -1,28 +1,59 @@
 :root {
-    color-scheme: light dark;
-    --bg-color: light-dark(#fef7ff, #1a1a1a);
+  color-scheme: light dark;
+
+  /* Modern CSS variables with light-dark() support */
+  --bg-color: light-dark(#f4f6f8, #121316);
+  --card-bg: light-dark(#ffffff, #1e2025);
+  --card-active: light-dark(#e9ecef, #2a2d34);
+  --text-main: light-dark(#1a1a1e, #e6e8ec);
+  --border-color: light-dark(#d0d5dd, #333742);
+  --accent-role: light-dark(#9b111e, #e63946); /* Crimson tone for roles */
 }
 
 body {
-    background: var(--bg-color);
+  background: var(--bg-color);
+  color: var(--text-main);
+  font-family: system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 20px;
 }
 
 #playerList {
-    li {
-        list-style: none;
+  padding: 0;
+  max-width: 480px;
+  margin: 0 auto;
+}
 
-    }
+.player-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  margin: 10px 0;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background-color 0.15s ease, transform 0.05s ease;
+}
+
+/* Touch/Click visual feedback */
+.player-card:active {
+  background-color: var(--card-active);
+  transform: scale(0.99); /* Slight press-in effect */
 }
 
 .hiddenInfo {
   visibility: hidden;
   user-select: none;
-  -webkit-user-select: none; /* Safari support */
+  -webkit-user-select: none;
+  font-weight: 600;
+  color: var(--accent-role);
 }
 
-/* Revealed state: visible and selectable again */
 .hiddenInfo.revealed {
   visibility: visible;
-  user-select: text;
-  -webkit-user-select: text;
 }

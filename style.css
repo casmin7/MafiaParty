@@ -13,3 +13,16 @@ body {
 
     }
 }
+
+.hiddenInfo {
+  visibility: hidden;
+  user-select: none;
+  -webkit-user-select: none; /* Safari support */
+}
+
+/* Revealed state: visible and selectable again */
+.hiddenInfo.revealed {
+  visibility: visible;
+  user-select: text;
+  -webkit-user-select: text;
+}

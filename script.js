@@ -143,10 +143,10 @@ function parseInput() {
   const detectiveCheckbox = document.getElementById("detectiveCheckbox");
   const doctorCheckbox = document.getElementById("doctorCheckbox");
 
-  if (detectiveCheckbox.checked) {
+  if (detectiveCheckbox.checked && !nightRoles.includes("detective")) {
     nightRoles.push("detective");
   }
-  if (doctorCheckbox.checked) {
+  if (doctorCheckbox.checked && !nightRoles.includes("doctor")) {
     nightRoles.push("doctor");
   }
 }

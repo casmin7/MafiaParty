@@ -246,9 +246,9 @@ function resolveNightActions() {
     players[name].affectedBy = [];
   }
   if (nightSummary.length > 0) {
-    alert("--- NIGHT RESOLUTION ---\n\n" + nightSummary.join("\n\n"));
+    alert("--- Summery ---\n\n" + nightSummary.join("\n\n"));
   } else {
-    alert("--- NIGHT RESOLUTION ---\n\nNothing happened tonight.");
+    alert("--- Summery ---\n\nNothing happened tonight.");
   }
 }
 

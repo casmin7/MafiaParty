@@ -95,35 +95,43 @@ function renderPlayers() {
     }
 
     const showRole = () => {
-      if (currentStage === "DAY") {
-        roleSpan.classList.add("revealed");
-      }
-    };
-    const hideRole = () => {
-      // Don't hide the text if the card is currently selected in NIGHT
-      if (currentStage === "NIGHT" && players[name].role === activeRole) {
-        return;
-      }
-      roleSpan.classList.remove("revealed");
-    };
+          if (currentStage === "DAY") {
+            roleSpan.classList.add("revealed");
+          }
+        };
 
-    li.addEventListener("click", () => {
-      handleCardClick(name);
-    });
+        const hideRole = () => {
+          // Don't hide the text if the card is currently selected in NIGHT
+          if (currentStage === "NIGHT" && players[name].role === activeRole) {
+            return;
+          }
+          roleSpan.classList.remove("revealed");
+        };
 
-    li.addEventListener("mousedown", showRole);
-    li.addEventListener("mouseup", hideRole);
-    li.addEventListener("mouseleave", hideRole); // Hide if mouse drags off button
+        // --- ATTACH LISTENERS HERE (Outside showRole / hideRole) ---
 
-    // Mobile support
-    li.addEventListener("touchstart", (e) => { e.preventDefault(); showRole(); });
-    li.addEventListener("touchend", hideRole);
+        // Single tap handler for desktop & mobile
+        li.addEventListener("click", () => {
+          handleCardClick(name);
+        });
 
-    li.appendChild(nameSpan);
-    li.appendChild(roleSpan);
+        // Hold-to-reveal role handlers
+        li.addEventListener("mousedown", showRole);
+        li.addEventListener("mouseup", hideRole);
+        li.addEventListener("mouseleave", hideRole);
 
-    playerList.appendChild(li);
-  }
+        // Mobile touch support without breaking click events
+        li.addEventListener("touchstart", () => {
+          showRole();
+        }, { passive: true });
+
+        li.addEventListener("touchend", hideRole);
+        li.addEventListener("touchcancel", hideRole);
+
+        li.appendChild(nameSpan);
+        li.appendChild(roleSpan);
+
+        playerList.appendChild(li);
 }
 
 // Stages

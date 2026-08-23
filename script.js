@@ -179,16 +179,15 @@ function handleCardClick(playerName) {
       alert(`${playerName} is already assigned as ${players[playerName].role}!`);
     }
   }
-  if (!editing) {
-      const actionIndex = players[playerName].affectedBy.indexOf(activeRole);
+  if (currentStage === "NIGHT" && !editing) {
+    const actionIndex = players[playerName].affectedBy.indexOf(activeRole);
 
-      if (actionIndex > -1) {
-        // Already affected by this role -> unselect (remove from array)
-        players[playerName].affectedBy.splice(actionIndex, 1);
-      } else {
-        // Not affected yet -> add active role to array
-        players[playerName].affectedBy.push(activeRole);
-      }
+    if (actionIndex > -1) {
+      // Already affected by this role -> unselect (remove from array)
+      players[playerName].affectedBy.splice(actionIndex, 1);
+    } else {
+      // Not affected yet -> add active role to array
+      players[playerName].affectedBy.push(activeRole);
     }
 
   renderPlayers();

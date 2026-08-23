@@ -51,12 +51,14 @@ function renderPlayers() {
       roleSubTitle.textContent = "Tap a player card to eliminate them";
     }
   }
-}
 
   // Player List
   const playerList = document.getElementById("playerList");
+  if (!playerList) return;
+
   // Clear list
   playerList.innerHTML = "";
+
   // Render players
   for (const name in players) {
     const li = document.createElement("li");
@@ -76,7 +78,7 @@ function renderPlayers() {
 
     const assignedRole = players[name].role;
 
-    // Get the role you are currently assigning right now in Night 1
+    // Get the role active right now
     const activeRole = nightRoles[currentRoleIndex];
 
     // If this player has been given the active role, mark their card!
@@ -96,43 +98,37 @@ function renderPlayers() {
     }
 
     const showRole = () => {
-          if (currentStage === "DAY") {
-            roleSpan.classList.add("revealed");
-          }
-        };
+      if (currentStage === "DAY") {
+        roleSpan.classList.add("revealed");
+      }
+    };
 
-        const hideRole = () => {
-          // Don't hide the text if the card is currently selected in NIGHT
-          if (currentStage === "NIGHT" && players[name].role === activeRole) {
-            return;
-          }
-          roleSpan.classList.remove("revealed");
-        };
+    const hideRole = () => {
+      // Don't hide the text if the card is currently selected in NIGHT
+      if (currentStage === "NIGHT" && players[name].role === activeRole) {
+        return;
+      }
+      roleSpan.classList.remove("revealed");
+    };
 
-        // --- ATTACH LISTENERS HERE (Outside showRole / hideRole) ---
+    // Clean single event assignment
+    li.addEventListener("click", () => {
+      handleCardClick(name);
+    });
 
-        // Single tap handler for desktop & mobile
-        li.addEventListener("click", () => {
-          handleCardClick(name);
-        });
+    li.addEventListener("mousedown", showRole);
+    li.addEventListener("mouseup", hideRole);
+    li.addEventListener("mouseleave", hideRole);
 
-        // Hold-to-reveal role handlers
-        li.addEventListener("mousedown", showRole);
-        li.addEventListener("mouseup", hideRole);
-        li.addEventListener("mouseleave", hideRole);
+    li.addEventListener("touchstart", showRole, { passive: true });
+    li.addEventListener("touchend", hideRole);
+    li.addEventListener("touchcancel", hideRole);
 
-        // Mobile touch support without breaking click events
-        li.addEventListener("touchstart", () => {
-          showRole();
-        }, { passive: true });
+    li.appendChild(nameSpan);
+    li.appendChild(roleSpan);
 
-        li.addEventListener("touchend", hideRole);
-        li.addEventListener("touchcancel", hideRole);
-
-        li.appendChild(nameSpan);
-        li.appendChild(roleSpan);
-
-        playerList.appendChild(li);
+    playerList.appendChild(li);
+  }
 }
 
 // Stages

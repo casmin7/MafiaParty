@@ -199,8 +199,13 @@ function resolveNightActions() {
   for (const name in players) {
     const actions = players[name].affectedBy;
 
+    if (actions.includes("detective")) {
+      const isMafia = players[name].role === "mafia";
+      alert(`Detective ${name} found ${isMafia ? "mafia" : "a civilian"}!`);
+    }
     // Mafia targets player, but Doctor didn't save them
     if (actions.includes("mafia") && !actions.includes("doctor")) {
+      alert(`Mafia killed ${name}!`);
       players[name].role = "eliminated";
     }
 
@@ -227,6 +232,7 @@ function resetGame() {
     nightRoles.push("mafia"); // Keep base role
 
     // Toggle UI section visibility back to setup
+    document.getElementById("nextStageButton").textContent = "Start Game";
     document.getElementById("setup_div").hidden = false;
     document.getElementById("edit_div").style.visibility = "hidden";
 

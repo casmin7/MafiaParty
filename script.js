@@ -179,14 +179,19 @@ function nextStage() {
 }
 
 function parseInput() {
-  const detectiveCheckbox = document.getElementById("detectiveCheckbox");
-  const doctorCheckbox = document.getElementById("doctorCheckbox");
+  const checkboxMap = {
+    escortCheckbox: "escort",
+    cupidCheckbox: "cupid",
+    mutilatorCheckbox: "mutilator",
+    detectiveCheckbox: "detective",
+    doctorCheckbox: "doctor"
+  };
 
-  if (detectiveCheckbox.checked && !nightRoles.includes("detective")) {
-    nightRoles.push("detective");
-  }
-  if (doctorCheckbox.checked && !nightRoles.includes("doctor")) {
-    nightRoles.push("doctor");
+  for (const [id, role] of Object.entries(checkboxMap)) {
+    const el = document.getElementById(id);
+    if (el && el.checked && !nightRoles.includes(role)) {
+      nightRoles.push(role);
+    }
   }
 }
 
@@ -232,28 +237,93 @@ function handleCardClick(playerName) {
 
 function resolveNightActions() {
   const nightSummary = [];
+
+  // 1. Identify who was roleblocked by the Escort
+  const blockedPlayers = Object.keys(players).filter(p =>
+    players[p].affectedBy.includes("escort")
+  );
+
+  for (const name in players) {
+    if (blockedPlayers.includes(name)) {
+      nightSummary.push(`🔞 ${name} was visited by the Escort and couldn't act!`);
+    }
+  }
+
+  // Helper to check if a specific role's player is currently blocked
+  const isRoleBlocked = (roleName) => {
+    const performer = Object.keys(players).find(p => players[p].role === roleName);
+    return performer && blockedPlayers.includes(performer);
+  };
+
+  // 2. Process Cupid (Only links lovers if Cupid isn't blocked)
+  if (!isRoleBlocked("cupid")) {
+    const cupidTargets = Object.keys(players).filter(p =>
+      players[p].affectedBy.includes("cupid")
+    );
+    if (cupidTargets.length === 2 && loversPair.length === 0) {
+      loversPair = cupidTargets;
+      nightSummary.push(`💘 Cupid linked ${loversPair[0]} and ${loversPair[1]} as Lovers!`);
+    }
+  }
+
+  // 3. Process Mutilator (Silences player for Day phase)
+  if (!isRoleBlocked("mutilator")) {
+    for (const name in players) {
+      if (players[name].affectedBy.includes("mutilator")) {
+        players[name].isMuted = true; // Read this during Day phase UI
+        nightSummary.push(`🤐 ${name} was silenced and cannot speak today!`);
+      }
+    }
+  }
+
+  // 4. Process Detective
+  if (!isRoleBlocked("detective")) {
+    for (const name in players) {
+      if (players[name].affectedBy.includes("detective")) {
+        const isMafia = players[name].role === "mafia";
+        nightSummary.push(`🔍 Detective found ${name} is ${isMafia ? "MAFIA" : "CIVILIAN"}.`);
+      }
+    }
+  }
+
+  // 5. Process Mafia Attack vs. Doctor Save
+  const mafiaBlocked = isRoleBlocked("mafia");
+  const doctorBlocked = isRoleBlocked("doctor");
+
   for (const name in players) {
     const actions = players[name].affectedBy;
 
-    if (actions.includes("detective")) {
-      const isMafia = players[name].role === "mafia";
-      nightSummary.push(`Detective found ${isMafia ? "mafia" : "a civilian"}!`);
-    }
-    // Mafia targets player, but Doctor didn't save them
-    if (actions.includes("mafia") && !actions.includes("doctor")) {
-      nightSummary.push(`Mafia killed ${name}!`);
-      players[name].role = "eliminated";
-    } else if (actions.includes("doctor")) {
-      nightSummary.push(`Doctor saved ${name}!`);
+    if (actions.includes("mafia")) {
+      if (mafiaBlocked) {
+        nightSummary.push(`🛡️ Mafia was roleblocked; no attack occurred!`);
+      } else if (actions.includes("doctor") && !doctorBlocked) {
+        nightSummary.push(`💉 Doctor saved ${name}!`);
+      } else {
+        nightSummary.push(`💀 Mafia killed ${name}!`);
+        eliminatePlayer(name, nightSummary);
+      }
     }
 
-    // Reset night targets for the next round
+    // Reset night action targets
     players[name].affectedBy = [];
   }
-  if (nightSummary.length > 0) {
-    alert("--- Summery ---\n\n" + nightSummary.join("\n\n"));
-  } else {
-    alert("--- Summery ---\n\nNothing happened tonight.");
+
+  // Alert summary
+  alert(nightSummary.length > 0 ? nightSummary.join("\n\n") : "Quiet night... nothing happened.");
+}
+
+function eliminatePlayer(playerName, summaryArray = []) {
+  if (players[playerName].role === "eliminated") return;
+
+  players[playerName].role = "eliminated";
+
+  // Check if this player was a Lover
+  if (loversPair.includes(playerName)) {
+    const partnerName = loversPair.find(p => p !== playerName);
+    if (partnerName && players[partnerName].role !== "eliminated") {
+      summaryArray.push(`💔 ${partnerName} died of heartbreak following ${playerName}'s death!`);
+      players[partnerName].role = "eliminated";
+    }
   }
 }
 

@@ -140,6 +140,7 @@ function nextStage() {
       break;
     case "NIGHT":
       currentRoleIndex++;
+      advanceNightRole()
       console.log("currentRoleIndex: " + currentRoleIndex);
       if (currentRoleIndex >= nightRoles.length) {
         resolveNightActions();
@@ -256,7 +257,7 @@ function resolveNightActions() {
 
 function advanceNightRole() {
   const activeRole = nightRoles[currentRoleIndex];
-  
+
   // Check if an ALIVE player has this role
   const isRoleAlive = Object.values(players).some(
     (p) => p.role === activeRole

@@ -12,11 +12,14 @@
 
 <div id="setup_div">
     <button onclick="addPlayer()">Add Player</button>
-    <input type="number" value="2" id="mafiaCount">
-    <input type="number" value="1" id="detectiveCount">
-    <input type="number" value="1" id="doctorCount">
+    <input type="checkbox" id="detectiveCheckbox">
+    <input type="checkbox" id="doctorCheckbox">
 </div>
-<button onclick="nextStage()">Next Stage</button>
+<button onclick="nextStage()">Start Game</button>
+<div id="edit_div" style="visibility: hidden;">
+    <button onclick="editToggle()">Done Editing</button>
+    <button onclick="currentRoleIndex --">Previous Role</button>
+</div>
 <script src="script.js"></script>
 </body>
 </html>

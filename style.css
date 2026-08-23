@@ -7,7 +7,9 @@
   --card-active: light-dark(#e9ecef, #2a2d34);
   --text-main: light-dark(#1a1a1e, #e6e8ec);
   --border-color: light-dark(#d0d5dd, #333742);
-  --accent-role: light-dark(#9b111e, #e63946); /* Crimson tone for roles */
+  --accent-role: light-dark(#9b111e, #e63946);
+  --villager-role: light-dark(#006633, #39FF14);
+  --eliminated-bg: light-dark(#e5e7eb, #18191c);
 }
 
 body {
@@ -60,5 +62,25 @@ body {
 
 /* CSS based on roles/states */
 .player-card[data-role="eliminated"] {
-    cursor: not-allowed;
+  cursor: not-allowed;
+  filter: grayscale(100%);
+  opacity: 0.45;
+  border-color: transparent;
+  background-color: var(--eliminated-bg);
+
+}
+
+
+.player-card.selected {
+    border: 2px dashed var(--accent-role);
+    color: var(--accent-role);
+}
+
+.player-card[data-role="none"] span {
+    color: var(--villager-role);
+}
+
+.player-card.targeted {
+  border: 2px solid #e63946;
+  background-color: rgba(230, 57, 70, 0.2);
 }

@@ -7,6 +7,10 @@
 	<link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="gameHeader">
+      <h2 id="stageTitle">SETUP PHASE</h2>
+      <p id="roleSubTitle">Add players and select roles to begin</p>
+    </div>
     <div id="playerList">
     </div>
 
@@ -20,7 +24,7 @@
 <button id="nextStageButton" onclick="nextStage()">Start Game</button>
 <div id="edit_div" style="visibility: hidden;">
     <button onclick="editToggle()">Done Editing</button>
-    <button onclick="currentRoleIndex --">Previous Role</button>
+    <button onclick="currentRoleIndex --; renderPlayers()">Previous Role</button>
     <button onclick="resetGame()">Reset Game State</button>
 
 </div>

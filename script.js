@@ -30,6 +30,27 @@ function addPlayer() {
 
 // DOM rendering of player list
 function renderPlayers() {
+  // Header
+  const stageTitle = document.getElementById("stageTitle");
+  const roleSubTitle = document.getElementById("roleSubTitle");
+
+  if (stageTitle && roleSubTitle) {
+    if (currentStage === "SETUP") {
+      stageTitle.textContent = "SETUP PHASE";
+      roleSubTitle.textContent = "Add players to get started";
+    } else if (currentStage === "NIGHT") {
+      const activeRole = nightRoles[currentRoleIndex] ? nightRoles[currentRoleIndex].toUpperCase() : "";
+      stageTitle.textContent = `NIGHT PHASE — ${activeRole}`;
+      roleSubTitle.textContent = editing
+        ? `Tap player to assign ${activeRole} role`
+        : `Tap player to select ${activeRole}'s target`;
+    } else if (currentStage === "DAY") {
+      stageTitle.textContent = "DAY PHASE";
+      roleSubTitle.textContent = "Tap a player card to eliminate them";
+    }
+  }
+
+  // Player List
   const playerList = document.getElementById("playerList");
   // Clear list
   playerList.innerHTML = "";
@@ -196,22 +217,30 @@ function handleCardClick(playerName) {
 }
 
 function resolveNightActions() {
+  const nightSummary = [];
   for (const name in players) {
     const actions = players[name].affectedBy;
 
     if (actions.includes("detective")) {
       const isMafia = players[name].role === "mafia";
-      alert(`Detective ${name} found ${isMafia ? "mafia" : "a civilian"}!`);
+      nightSummary.push(`Detective found ${isMafia ? "mafia" : "a civilian"}!`);
     }
     // Mafia targets player, but Doctor didn't save them
     if (actions.includes("mafia") && !actions.includes("doctor")) {
-      alert(`Mafia killed ${name}!`);
+      nightSummary.push(`Mafia killed ${name}!`);
       players[name].role = "eliminated";
+    } else if (actions.includes("doctor")) {
+      nightSummary.push(`Doctor saved ${name}!`);
     }
 
     // Reset night targets for the next round
     players[name].affectedBy = [];
   }
+  if (nightSummary.length > 0) {
+      alert("--- NIGHT RESOLUTION ---\n\n" + nightSummary.join("\n\n"));
+    } else {
+      alert("--- NIGHT RESOLUTION ---\n\nNothing happened tonight.");
+    }
 }
 
 

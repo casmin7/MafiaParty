@@ -14,18 +14,19 @@ function editToggle() {
 // Initial game state, adding players
 function addPlayer() {
   const playerName = prompt("Enter player name:");
-  // Duplicate check
   if (players.hasOwnProperty(playerName)) {
     alert("Player already exists!");
     return;
   }
-  // Player add
   if (playerName) {
-    players[playerName] = { name: playerName, role: "none", affectedBy: [] };
+    players[playerName] = {
+      name: playerName,
+      role: "none",
+      affectedBy: [],
+      isMuted: false
+    };
   }
-  // Render
   renderPlayers();
-  // --- Logging ---
   for (const name in players) {
     console.log(name, players[name].role);
   }
@@ -180,19 +181,29 @@ function nextStage() {
 }
 
 function parseInput() {
-  const checkboxMap = {
-    escortCheckbox: "escort",
-    cupidCheckbox: "cupid",
-    mutilatorCheckbox: "mutilator",
-    detectiveCheckbox: "detective",
-    doctorCheckbox: "doctor"
-  };
+  // Clear array to prevent duplicate pushes on stage changes
+  nightRoles.length = 0;
 
-  for (const [id, role] of Object.entries(checkboxMap)) {
-    const el = document.getElementById(id);
-    if (el && el.checked && !nightRoles.includes(role)) {
-      nightRoles.push(role);
+  // Order defined by desired turn sequence
+  const desiredOrder = [
+    { id: "escortCheckbox", role: "escort" },
+    { id: "cupidCheckbox", role: "cupid" },
+    { id: "mutilatorCheckbox", role: "mutilator" },
+    { id: "detectiveCheckbox", role: "detective" },
+    { id: "doctorCheckbox", role: "doctor" }
+  ];
+
+  // Insert Escort, Cupid, Mutilator first if checked
+  desiredOrder.forEach(item => {
+    const el = document.getElementById(item.id);
+    if (el && el.checked && !nightRoles.includes(item.role)) {
+      nightRoles.push(item.role);
     }
+  });
+
+  // Always include Mafia automatically (inserted at the end or before Doctor/Detective)
+  if (!nightRoles.includes("mafia")) {
+    nightRoles.push("mafia");
   }
 }
 

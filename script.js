@@ -4,6 +4,7 @@ let currentRoleIndex = 0;
 const nightRoles = ["mafia"];
 let editing = false;
 let rolesAssigned = false;
+let loversPair = [];
 
 function editToggle() {
   editing = !editing;

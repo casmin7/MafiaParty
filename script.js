@@ -51,6 +51,7 @@ function renderPlayers() {
       roleSubTitle.textContent = "Tap a player card to eliminate them";
     }
   }
+}
 
   // Player List
   const playerList = document.getElementById("playerList");

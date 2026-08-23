@@ -189,9 +189,9 @@ function handleCardClick(playerName) {
       // Not affected yet -> add active role to array
       players[playerName].affectedBy.push(activeRole);
     }
-
-  renderPlayers();
   }
+  renderPlayers();
+
 }
 
 function resolveNightActions() {

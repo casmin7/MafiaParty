@@ -20,6 +20,12 @@ body {
   padding: 20px;
 }
 
+#setup_div {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 #playerList {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

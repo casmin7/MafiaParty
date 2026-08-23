@@ -3,6 +3,7 @@ let currentStage = "SETUP"
 let currentRoleIndex = 0;
 const nightRoles = ["mafia"];
 let editing = false;
+let rolesAssigned = false;
 
 function editToggle() {
   editing = !editing;
@@ -145,8 +146,18 @@ function nextStage() {
         currentStage = "DAY";
         currentRoleIndex = 0; // Reset for future nights
         console.log("Stage changed to DAY");
+        editing = false;
+        rolesAssigned = true;
+      } else {
+        const activeRole = nightRoles[currentRoleIndex];
+
+        if (!rolesAssigned) {
+          const roleExists = Object.values(players).some(p => p.role === activeRole);
+          editing = !roleExists;
+        } else {
+          editing = false; // Night setup complete, stay in action/targeting mode
+        }
       }
-      editing = false;
       break;
     case "DAY":
       currentStage = "NIGHT";
@@ -243,6 +254,22 @@ function resolveNightActions() {
     }
 }
 
+function advanceNightRole() {
+  const activeRole = nightRoles[currentRoleIndex];
+  
+  // Check if an ALIVE player has this role
+  const isRoleAlive = Object.values(players).some(
+    (p) => p.role === activeRole
+  );
+
+  // If role is dead (and we already finished setup), skip to next role
+  if (!isRoleAlive && rolesAssigned) {
+    currentRoleIndex++;
+    if (currentRoleIndex < nightRoles.length) {
+      advanceNightRole(); // Recurse to check next role
+    }
+  }
+}
 
 function resetGame() {
   if (!confirm("Are you sure you want to reset the entire game?")) return;
@@ -259,6 +286,7 @@ function resetGame() {
     editing = false;
     nightRoles.length = 0;
     nightRoles.push("mafia"); // Keep base role
+    rolesAssigned = false;
 
     // Toggle UI section visibility back to setup
     document.getElementById("nextStageButton").textContent = "Start Game";

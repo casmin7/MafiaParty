@@ -140,7 +140,7 @@ function nextStage() {
       break;
     case "NIGHT":
       currentRoleIndex++;
-      advanceNightRole()
+      advanceNightRole();
       console.log("currentRoleIndex: " + currentRoleIndex);
       if (currentRoleIndex >= nightRoles.length) {
         resolveNightActions();

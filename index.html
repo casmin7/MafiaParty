@@ -15,10 +15,12 @@
     <input type="checkbox" id="detectiveCheckbox">
     <input type="checkbox" id="doctorCheckbox">
 </div>
-<button onclick="nextStage()">Start Game</button>
+<button id="nextStageButton" onclick="nextStage()">Start Game</button>
 <div id="edit_div" style="visibility: hidden;">
     <button onclick="editToggle()">Done Editing</button>
     <button onclick="currentRoleIndex --">Previous Role</button>
+    <button onclick="resetGame()">Reset Game State</button>
+
 </div>
 <script src="script.js"></script>
 </body>

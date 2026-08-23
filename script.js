@@ -107,6 +107,7 @@ function renderPlayers() {
 function nextStage() {
   switch (currentStage) {
     case "SETUP":
+      document.getElementById("nextStageButton").innerHTML = "Next Stage";
       document.getElementById("setup_div").hidden = true;
       document.getElementById("edit_div").style.visibility = "visible";
       parseInput();
@@ -206,4 +207,29 @@ function resolveNightActions() {
     // Reset night targets for the next round
     players[name].affectedBy = [];
   }
+}
+
+
+function resetGame() {
+  if (!confirm("Are you sure you want to reset the entire game?")) return;
+
+    // Clear player data
+    for (const name in players) {
+        players[name].role = "none";
+        players[name].affectedBy = [];
+      }
+
+    // Reset state variables
+    currentStage = "SETUP";
+    currentRoleIndex = 0;
+    editing = false;
+    nightRoles.length = 0;
+    nightRoles.push("mafia"); // Keep base role
+
+    // Toggle UI section visibility back to setup
+    document.getElementById("setup_div").hidden = false;
+    document.getElementById("edit_div").style.visibility = "hidden";
+
+    // Re-render empty player list
+    renderPlayers();
 }

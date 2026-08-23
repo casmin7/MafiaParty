@@ -181,30 +181,30 @@ function nextStage() {
 }
 
 function parseInput() {
-  // Clear array to prevent duplicate pushes on stage changes
+  // Reset array to ensure a clean sequence on every run
   nightRoles.length = 0;
 
-  // Order defined by desired turn sequence
-  const desiredOrder = [
-    { id: "escortCheckbox", role: "escort" },
-    { id: "cupidCheckbox", role: "cupid" },
-    { id: "mutilatorCheckbox", role: "mutilator" },
-    { id: "detectiveCheckbox", role: "detective" },
-    { id: "doctorCheckbox", role: "doctor" }
+  // Roles in exact desired turn sequence
+  const roleSequence = [
+    { id: "escortCheckbox", role: "escort" },       // 1st: Roleblocker
+    { id: "cupidCheckbox", role: "cupid" },         // 2nd: Matchmaker
+    { id: "mutilatorCheckbox", role: "mutilator" }, // 3rd: Silencer
+    { id: null, role: "mafia" },                    // 4th: Mafia (Always included)
+    { id: "detectiveCheckbox", role: "detective" }, // 5th: Investigator
+    { id: "doctorCheckbox", role: "doctor" }        // 6th: Saver
   ];
 
-  // Insert Escort, Cupid, Mutilator first if checked
-  desiredOrder.forEach(item => {
-    const el = document.getElementById(item.id);
-    if (el && el.checked && !nightRoles.includes(item.role)) {
-      nightRoles.push(item.role);
+  roleSequence.forEach(item => {
+    // If it's Mafia (no element required) OR the checkbox is checked in DOM
+    if (item.role === "mafia") {
+      nightRoles.push("mafia");
+    } else {
+      const el = document.getElementById(item.id);
+      if (el && el.checked) {
+        nightRoles.push(item.role);
+      }
     }
   });
-
-  // Always include Mafia automatically (inserted at the end or before Doctor/Detective)
-  if (!nightRoles.includes("mafia")) {
-    nightRoles.push("mafia");
-  }
 }
 
 function handleCardClick(playerName) {

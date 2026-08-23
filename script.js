@@ -191,6 +191,7 @@ function handleCardClick(playerName) {
     }
 
   renderPlayers();
+  }
 }
 
 function resolveNightActions() {

@@ -1,5 +1,5 @@
 const players = {};
-let currentStage = "SETUP"
+let currentStage = "SETUP";
 let currentRoleIndex = 0;
 const nightRoles = ["mafia"];
 let editing = false;
@@ -9,11 +9,12 @@ function editToggle() {
   editing = !editing;
   renderPlayers();
 }
+
 // Initial game state, adding players
 function addPlayer() {
   const playerName = prompt("Enter player name:");
-  //Duplicate check
-  if(players.hasOwnProperty(playerName)) {
+  // Duplicate check
+  if (players.hasOwnProperty(playerName)) {
     alert("Player already exists!");
     return;
   }
@@ -60,7 +61,7 @@ function renderPlayers() {
     const li = document.createElement("li");
     li.className = "player-card";
 
-    const nameSpan = document.createElement("h1")
+    const nameSpan = document.createElement("h1");
     const roleSpan = document.createElement("span");
 
     nameSpan.textContent = name;
@@ -97,7 +98,7 @@ function renderPlayers() {
       if (currentStage === "DAY") {
         roleSpan.classList.add("revealed");
       }
-    }
+    };
     const hideRole = () => {
       // Don't hide the text if the card is currently selected in NIGHT
       if (currentStage === "NIGHT" && players[name].role === activeRole) {
@@ -107,16 +108,16 @@ function renderPlayers() {
     };
 
     li.addEventListener("click", () => {
-        handleCardClick(name);
-      });
+      handleCardClick(name);
+    });
 
-      li.addEventListener("mousedown", showRole);
-      li.addEventListener("mouseup", hideRole);
-      li.addEventListener("mouseleave", hideRole); // Hide if mouse drags off button
+    li.addEventListener("mousedown", showRole);
+    li.addEventListener("mouseup", hideRole);
+    li.addEventListener("mouseleave", hideRole); // Hide if mouse drags off button
 
-      // Mobile support
-      li.addEventListener("touchstart", (e) => { e.preventDefault(); showRole(); });
-      li.addEventListener("touchend", hideRole);
+    // Mobile support
+    li.addEventListener("touchstart", (e) => { e.preventDefault(); showRole(); });
+    li.addEventListener("touchend", hideRole);
 
     li.appendChild(nameSpan);
     li.appendChild(roleSpan);
@@ -170,7 +171,6 @@ function nextStage() {
       break;
   }
   renderPlayers();
-
 }
 
 function parseInput() {
@@ -184,7 +184,6 @@ function parseInput() {
     nightRoles.push("doctor");
   }
 }
-
 
 function handleCardClick(playerName) {
   if (players[playerName].role === "eliminated") return;
@@ -200,7 +199,6 @@ function handleCardClick(playerName) {
   }
 
   if (currentStage === "NIGHT" && editing) {
-
     if (players[playerName].role === activeRole) {
       players[playerName].role = "none";
     }
@@ -225,7 +223,6 @@ function handleCardClick(playerName) {
     }
   }
   renderPlayers();
-
 }
 
 function resolveNightActions() {
@@ -249,10 +246,10 @@ function resolveNightActions() {
     players[name].affectedBy = [];
   }
   if (nightSummary.length > 0) {
-      alert("--- NIGHT RESOLUTION ---\n\n" + nightSummary.join("\n\n"));
-    } else {
-      alert("--- NIGHT RESOLUTION ---\n\nNothing happened tonight.");
-    }
+    alert("--- NIGHT RESOLUTION ---\n\n" + nightSummary.join("\n\n"));
+  } else {
+    alert("--- NIGHT RESOLUTION ---\n\nNothing happened tonight.");
+  }
 }
 
 function advanceNightRole() {
@@ -275,25 +272,25 @@ function advanceNightRole() {
 function resetGame() {
   if (!confirm("Are you sure you want to reset the entire game?")) return;
 
-    // Clear player data
-    for (const name in players) {
-        players[name].role = "none";
-        players[name].affectedBy = [];
-      }
+  // Clear player data
+  for (const name in players) {
+    players[name].role = "none";
+    players[name].affectedBy = [];
+  }
 
-    // Reset state variables
-    currentStage = "SETUP";
-    currentRoleIndex = 0;
-    editing = false;
-    nightRoles.length = 0;
-    nightRoles.push("mafia"); // Keep base role
-    rolesAssigned = false;
+  // Reset state variables
+  currentStage = "SETUP";
+  currentRoleIndex = 0;
+  editing = false;
+  nightRoles.length = 0;
+  nightRoles.push("mafia"); // Keep base role
+  rolesAssigned = false;
 
-    // Toggle UI section visibility back to setup
-    document.getElementById("nextStageButton").textContent = "Start Game";
-    document.getElementById("setup_div").hidden = false;
-    document.getElementById("edit_div").style.visibility = "hidden";
+  // Toggle UI section visibility back to setup
+  document.getElementById("nextStageButton").textContent = "Start Game";
+  document.getElementById("setup_div").hidden = false;
+  document.getElementById("edit_div").style.visibility = "hidden";
 
-    // Re-render empty player list
-    renderPlayers();
+  // Re-render empty player list
+  renderPlayers();
 }

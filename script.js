@@ -138,7 +138,7 @@ function nextStage() {
   switch (currentStage) {
     case "SETUP":
       document.getElementById("nextStageButton").innerHTML = "Next Stage";
-      document.getElementById("setup_div").hidden = true;
+      document.getElementById("setup_div").style.display = "none";
       document.getElementById("edit_div").style.visibility = "visible";
       parseInput();
       currentStage = "NIGHT";
@@ -375,7 +375,7 @@ function resetGame() {
 
   // Toggle UI section visibility back to setup
   document.getElementById("nextStageButton").textContent = "Start Game";
-  document.getElementById("setup_div").hidden = false;
+  document.getElementById("setup_div").style.display = "flex";
   document.getElementById("edit_div").style.visibility = "hidden";
 
   // Re-render empty player list

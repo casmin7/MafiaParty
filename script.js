@@ -23,7 +23,6 @@ function addPlayer() {
       name: playerName,
       role: "none",
       affectedBy: [],
-      isMuted: false
     };
   }
   renderPlayers();
@@ -282,7 +281,6 @@ function resolveNightActions() {
   if (!isRoleBlocked("mutilator")) {
     for (const name in players) {
       if (players[name].affectedBy.includes("mutilator")) {
-        players[name].isMuted = true; // Read this during Day phase UI
         nightSummary.push(`🤐 ${name} was silenced and cannot speak today!`);
       }
     }

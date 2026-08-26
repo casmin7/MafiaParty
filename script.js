@@ -148,6 +148,7 @@ function nextStage() {
     case "NIGHT":
       currentRoleIndex++;
       advanceNightRole();
+      loversPair = [];
       console.log("currentRoleIndex: " + currentRoleIndex);
       if (currentRoleIndex >= nightRoles.length) {
         resolveNightActions();
@@ -256,7 +257,7 @@ function resolveNightActions() {
 
   for (const name in players) {
     if (blockedPlayers.includes(name)) {
-      nightSummary.push(`🔞 ${name} was visited by the Escort and couldn't act!`);
+      nightSummary.push(`🔞 ${players[name].role} was visited by the Escort and couldn't act!`);
     }
   }
 
@@ -271,17 +272,20 @@ function resolveNightActions() {
     const cupidTargets = Object.keys(players).filter(p =>
       players[p].affectedBy.includes("cupid")
     );
-    if (cupidTargets.length === 2 && loversPair.length === 0) {
-      loversPair = cupidTargets;
-      nightSummary.push(`💘 Cupid linked ${loversPair[0]} and ${loversPair[1]} as Lovers!`);
+    if (cupidTargets.length === 2) {
+      nightSummary.push(`💘 Cupid linked ${cupidTargets[0]} and ${cupidTargets[1]} as Lovers!`);
     }
   }
 
-  // 3. Process Mutilator (Silences player for Day phase)
+  // 3. Mutilator
   if (!isRoleBlocked("mutilator")) {
     for (const name in players) {
       if (players[name].affectedBy.includes("mutilator")) {
-        nightSummary.push(`🤐 ${name} was silenced and cannot speak today!`);
+        if (players[name] === cupidTargets[0] || players[name] === cupidTargets[1]) {
+          nightSummary.push(`${cupidTargets[0]} and ${cupidTargets[1]} were mutilated`);
+        } else {
+          nightSummary.push(`🤐 ${name} was mutilated`);
+        }
       }
     }
   }
@@ -396,4 +400,19 @@ function saveData() {
   };
   localStorage.setItem("mafiaGameData", JSON.stringify(data));
   console.log(JSON.parse(localStorage.getItem("mafiaGameData")));
+}
+
+function loadData() {
+  const data = JSON.parse(localStorage.getItem("mafiaGameData"));
+  if (data) {
+    players = data.players;
+    currentStage = data.currentStage;
+    currentRoleIndex = data.currentRoleIndex;
+    editing = data.editing;
+    nightRoles = data.nightRoles;
+    rolesAssigned = data.rolesAssigned;
+    loversPair = data.loversPair;
+    renderPlayers();
+  }
+
 }

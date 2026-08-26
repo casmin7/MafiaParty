@@ -37,7 +37,7 @@ function renderPlayers() {
   // Header
   const stageTitle = document.getElementById("stageTitle");
   const roleSubTitle = document.getElementById("roleSubTitle");
-
+  saveData();
   if (stageTitle && roleSubTitle) {
     if (currentStage === "SETUP") {
       stageTitle.textContent = "SETUP PHASE";
@@ -373,6 +373,9 @@ function resetGame() {
   nightRoles.push("mafia"); // Keep base role
   rolesAssigned = false;
 
+  // Remove storage
+  localStorage.removeItem("mafiaGameData");
+
   // Toggle UI section visibility back to setup
   document.getElementById("nextStageButton").textContent = "Start Game";
   document.getElementById("setup_div").style.display = "flex";
@@ -380,4 +383,19 @@ function resetGame() {
 
   // Re-render empty player list
   renderPlayers();
+}
+
+
+function saveData() {
+  const data = {
+    players: players,
+    currentStage: currentStage,
+    currentRoleIndex: currentRoleIndex,
+    editing: editing,
+    nightRoles: nightRoles,
+    rolesAssigned: rolesAssigned,
+    loversPair: loversPair,
+  };
+  localStorage.setItem("mafiaGameData", JSON.stringify(data));
+  console.log(JSON.parse(localStorage.getItem("mafiaGameData")));
 }

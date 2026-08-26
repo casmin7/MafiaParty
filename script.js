@@ -13,7 +13,7 @@ function editToggle() {
 
 // Initial game state, adding players
 function addPlayer() {
-  const playerName = prompt("Enter player name:");
+  const playerName = prompt("Enter player name:").trim();
   if (players.hasOwnProperty(playerName)) {
     alert("Player already exists!");
     return;

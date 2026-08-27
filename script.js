@@ -1,7 +1,7 @@
 const players = {};
 let currentStage = "SETUP";
 let currentRoleIndex = 0;
-let nightRoles = ["mafia"];
+let  nightRoles = ["mafia"];
 let editing = false;
 let rolesAssigned = false;
 let loversPair = [];
@@ -386,23 +386,6 @@ function resetGame() {
   // Re-render empty player list
   renderPlayers();
 }
-function loadData() {
-  const data = JSON.parse(localStorage.getItem("mafiaGameData"));
-  if (data) {
-    Object.assign(players, data.players || {});
-    currentStage = data.currentStage || "SETUP";
-    currentRoleIndex = data.currentRoleIndex || 0;
-    editing = data.editing || false;
-    nightRoles = data.nightRoles || [];
-    rolesAssigned = data.rolesAssigned || false;
-    loversPair = data.loversPair || [];
-  }
-  renderPlayers();
-
-}
-
-window.addEventListener("DOMContentLoaded", loadData);
-renderPlayers();
 
 function saveData() {
   const data = {
@@ -412,26 +395,64 @@ function saveData() {
     editing: editing,
     nightRoles: nightRoles,
     rolesAssigned: rolesAssigned,
-    loversPair: loversPair,
+    loversPair: loversPair
   };
   localStorage.setItem("mafiaGameData", JSON.stringify(data));
-  console.log(JSON.parse(localStorage.getItem("mafiaGameData")));
 }
 
 function loadData() {
-  const data = JSON.parse(localStorage.getItem("mafiaGameData"));
-  if (data) {
-    Object.assign(players, data.players || {});
+  const savedString = localStorage.getItem("mafiaGameData");
+  if (!savedString) {
+    renderPlayers();
+    return;
+  }
+
+  try {
+    const data = JSON.parse(savedString);
+
+    // 1. Clear current players object completely before restoring
+    for (const key in players) {
+      delete players[key];
+    }
+
+    // 2. Restore players object
+    if (data.players) {
+      Object.assign(players, data.players);
+    }
+
+    // 3. Restore primitive states
     currentStage = data.currentStage || "SETUP";
     currentRoleIndex = data.currentRoleIndex || 0;
     editing = data.editing || false;
-    nightRoles = data.nightRoles || [];
     rolesAssigned = data.rolesAssigned || false;
     loversPair = data.loversPair || [];
-  }
-  renderPlayers();
 
+    // 4. Restore nightRoles array safely
+    nightRoles.length = 0;
+    if (Array.isArray(data.nightRoles)) {
+      nightRoles.push(...data.nightRoles);
+    } else {
+      nightRoles.push("mafia");
+    }
+
+    // 5. Sync UI elements (Buttons/Divs) based on loaded stage
+    const nextBtn = document.getElementById("nextStageButton");
+    const setupDiv = document.getElementById("setup_div");
+    const editDiv = document.getElementById("edit_div");
+
+    if (currentStage !== "SETUP") {
+      if (nextBtn) nextBtn.textContent = "Next Stage";
+      if (setupDiv) setupDiv.style.display = "none";
+      if (editDiv) editDiv.style.visibility = "visible";
+    }
+
+  } catch (error) {
+    console.error("Failed to parse saved game data:", error);
+  }
+
+  // Render after all data and UI states are restored
+  renderPlayers();
 }
 
+// Load data automatically when the page finishes loading
 window.addEventListener("DOMContentLoaded", loadData);
-renderPlayers();

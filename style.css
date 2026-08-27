@@ -1,18 +1,19 @@
 :root {
   color-scheme: light dark;
 
-  /* Modern CSS variables with light-dark() support */
+  /* Color System */
   --bg-color: light-dark(#f4f6f8, #121316);
   --card-bg: light-dark(#ffffff, #1e2025);
   --card-active: light-dark(#e9ecef, #2a2d34);
   --text-main: light-dark(#1a1a1e, #e6e8ec);
   --border-color: light-dark(#d0d5dd, #333742);
   --accent-role: light-dark(#9b111e, #e63946);
-  --villager-role: light-dark(#006633, #39FF14);
+  --villager-role: light-dark(#006633, #39ff14);
   --eliminated-bg: light-dark(#e5e7eb, #18191c);
 }
 
-html, body {
+html,
+body {
   overflow-x: hidden;
   touch-action: manipulation;
 }
@@ -23,6 +24,14 @@ body {
   font-family: system-ui, -apple-system, sans-serif;
   margin: 0;
   padding: 20px;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
 }
 
 #setup_div {
@@ -32,13 +41,14 @@ body {
 }
 
 #playerList {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 10px;
-    padding: 0px;
-    margin: 20px auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 10px;
+  padding: 0;
+  margin: 20px 0;
 }
 
+/* Card Component */
 .player-card {
   display: flex;
   min-height: 54px;
@@ -52,7 +62,10 @@ body {
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
-  transition: background-color 0.15s ease, transform 0.05s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.05s ease;
   gap: 8px;
 }
 
@@ -62,14 +75,15 @@ body {
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Touch/Click visual feedback */
 .player-card:active {
   background-color: var(--card-active);
-  transform: scale(0.99); /* Slight press-in effect */
+  transform: scale(0.98);
 }
 
+/* Visibility States */
 .hiddenInfo {
   visibility: hidden;
   user-select: none;
@@ -82,38 +96,96 @@ body {
   visibility: visible;
 }
 
-/* CSS based on roles/states */
+/* Role & Card States */
 .player-card[data-role="eliminated"] {
   cursor: not-allowed;
   filter: grayscale(100%);
   opacity: 0.45;
   border-color: transparent;
   background-color: var(--eliminated-bg);
-
+  pointer-events: none; /* Prevents clicks on eliminated cards */
 }
 
-
 .player-card.selected {
-    border: 2px dashed var(--accent-role);
-    color: var(--accent-role);
+  border: 2px dashed var(--accent-role);
+  color: var(--accent-role);
 }
 
 .player-card[data-role="none"] span {
-    color: var(--villager-role);
+  color: var(--villager-role);
 }
 
 .player-card.targeted {
-  border: 2px solid #e63946;
-  background-color: rgba(230, 57, 70, 0.2);
+  border: 2px solid var(--accent-role);
+  background-color: light-dark(rgba(155, 17, 30, 0.1), rgba(230, 57, 70, 0.2));
 }
 
 .delete-btn {
   background: transparent;
   border: none;
-  color: #e63946;
+  color: var(--accent-role);
   font-size: 1.2rem;
   font-weight: bold;
   padding: 4px 10px;
   border-radius: 6px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Fixed Bottom Controls */
+/* Fixed Bottom Controls Container */
+#bottom_controls {
+  position: sticky;
+  bottom: 8px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+
+  /* Responsive Width & Centering */
+  width: calc(100% - 16px);
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+
+  padding: 8px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+#bottom_controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.05s ease;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+#bottom_controls button svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+  flex-shrink: 0;
+}
+
+#bottom_controls button:active {
+  background-color: var(--card-active);
+  transform: scale(0.98);
 }

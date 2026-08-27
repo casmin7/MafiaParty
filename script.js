@@ -166,7 +166,6 @@ function deleteAllPlayer() {
 function nextStage() {
   switch (currentStage) {
     case "SETUP":
-      document.getElementById("nextStageButton").innerHTML = "Next Stage";
       document.getElementById("setup_div").style.display = "none";
       document.getElementById("edit_div").style.visibility = "visible";
       parseInput();
@@ -399,7 +398,6 @@ function resetGame() {
   localStorage.removeItem("mafiaGameData");
 
   // Toggle UI section visibility back to setup
-  document.getElementById("nextStageButton").textContent = "Start Game";
   document.getElementById("setup_div").style.display = "flex";
   document.getElementById("edit_div").style.visibility = "hidden";
 
@@ -456,12 +454,10 @@ function loadData() {
     }
 
     // 5. Sync UI elements (Buttons/Divs) based on loaded stage
-    const nextBtn = document.getElementById("nextStageButton");
     const setupDiv = document.getElementById("setup_div");
     const editDiv = document.getElementById("edit_div");
 
     if (currentStage !== "SETUP") {
-      if (nextBtn) nextBtn.textContent = "Next Stage";
       if (setupDiv) setupDiv.style.display = "none";
       if (editDiv) editDiv.style.visibility = "visible";
     }

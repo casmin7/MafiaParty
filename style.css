@@ -139,10 +139,13 @@ body {
 #bottom_controls {
   position: sticky;
   bottom: 8px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 8px;
+
+  /* Use flexbox instead of fixed 3-column grid */
+  display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 
   /* Responsive Width & Centering */
   width: calc(100% - 16px);
@@ -176,6 +179,12 @@ body {
   transition: background-color 0.15s ease, transform 0.05s ease;
   min-width: 0;
   box-sizing: border-box;
+}
+
+/* Allow middle/action buttons to fill available space evenly */
+#btn_add_player,
+#btn_edit_toggle {
+  flex: 1;
 }
 
 #bottom_controls button svg {

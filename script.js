@@ -55,6 +55,38 @@ function renderPlayers() {
     }
   }
 
+  const btnDeleteAll = document.getElementById("btn_delete_all");
+    const btnAddPlayer = document.getElementById("btn_add_player");
+    const btnPrevStage = document.getElementById("btn_prev_stage");
+    const btnEditToggle = document.getElementById("btn_edit_toggle");
+    const btnResetGame = document.getElementById("btn_reset_game");
+    const editStatusText = document.getElementById("edit_status_text");
+
+    // Stage-based visibility rules
+    if (currentStage === "SETUP") {
+      if (btnDeleteAll) btnDeleteAll.style.display = "inline-flex";
+      if (btnAddPlayer) btnAddPlayer.style.display = "inline-flex";
+      if (btnPrevStage) btnPrevStage.style.display = "none";
+      if (btnEditToggle) btnEditToggle.style.display = "none";
+      if (btnResetGame) btnResetGame.style.display = "none";
+    } else if (currentStage === "NIGHT") {
+      if (btnDeleteAll) btnDeleteAll.style.display = "none";
+      if (btnAddPlayer) btnAddPlayer.style.display = "none";
+      if (btnPrevStage) btnPrevStage.style.display = "inline-flex";
+      if (btnEditToggle) btnEditToggle.style.display = "inline-flex";
+      if (btnResetGame) btnResetGame.style.display = "inline-flex"; // Visible during Night
+
+      if (editStatusText) {
+        editStatusText.textContent = editing ? "Done Editing" : "Edit Roles";
+      }
+    } else if (currentStage === "DAY") {
+      if (btnDeleteAll) btnDeleteAll.style.display = "none";
+      if (btnAddPlayer) btnAddPlayer.style.display = "none";
+      if (btnPrevStage) btnPrevStage.style.display = "inline-flex";
+      if (btnEditToggle) btnEditToggle.style.display = "none";      // Hidden during Day
+      if (btnResetGame) btnResetGame.style.display = "inline-flex";
+    }
+
   // Player List
   const playerList = document.getElementById("playerList");
   if (!playerList) return;

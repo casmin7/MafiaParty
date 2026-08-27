@@ -295,7 +295,7 @@ function resolveNightActions() {
     for (const name in players) {
       if (players[name].affectedBy.includes("detective")) {
         const isMafia = players[name].role === "mafia";
-        nightSummary.push(`🔍 Detective found ${name} is ${isMafia ? "MAFIA" : "CIVILIAN"}.`);
+        nightSummary.push(`🔍 Detective found ${isMafia ? "MAFIA" : "CIVILIAN"}.`);
       }
     }
   }

@@ -130,7 +130,33 @@ function renderPlayers() {
     li.appendChild(nameSpan);
     li.appendChild(roleSpan);
 
+    // delete button
+    if (currentStage === "SETUP") {
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "✕";
+      deleteBtn.className = "delete-btn";
+      deleteBtn.onclick = (e) => {
+        e.stopPropagation();
+        deletePlayer(name);
+      };
+      li.appendChild(deleteBtn);
+    }
+
     playerList.appendChild(li);
+  }
+}
+
+function deletePlayer(playerName) {
+  if (confirm(`Remove ${playerName} from setup?`)) {
+    delete players[playerName];
+    renderPlayers();
+  }
+}
+
+function deleteAllPlayer() {
+  if (confirm(`Remove all players from setup?`)) {
+    players = {};
+    renderPlayers();
   }
 }
 

@@ -377,6 +377,22 @@ function advanceNightRole() {
   }
 }
 
+function previousStage() {
+  if (currentStage === "NIGHT") {
+    if (currentRoleIndex > 0) {
+      currentRoleIndex--;
+    } else {
+      currentStage = "SETUP";
+      document.getElementById("setup_div").style.display = "flex";
+      editing = false;
+    }
+  } else if (currentStage === "DAY") {
+    currentStage = "NIGHT";
+    currentRoleIndex = nightRoles.length - 1;
+  }
+  renderPlayers();
+}
+
 function resetGame() {
   if (!confirm("Are you sure you want to reset the entire game?")) return;
 

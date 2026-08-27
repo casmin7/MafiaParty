@@ -1,7 +1,7 @@
 const players = {};
 let currentStage = "SETUP";
 let currentRoleIndex = 0;
-const nightRoles = ["mafia"];
+let nightRoles = ["mafia"];
 let editing = false;
 let rolesAssigned = false;
 let loversPair = [];
@@ -386,7 +386,23 @@ function resetGame() {
   // Re-render empty player list
   renderPlayers();
 }
+function loadData() {
+  const data = JSON.parse(localStorage.getItem("mafiaGameData"));
+  if (data) {
+    Object.assign(players, data.players || {});
+    currentStage = data.currentStage || "SETUP";
+    currentRoleIndex = data.currentRoleIndex || 0;
+    editing = data.editing || false;
+    nightRoles = data.nightRoles || [];
+    rolesAssigned = data.rolesAssigned || false;
+    loversPair = data.loversPair || [];
+  }
+  renderPlayers();
 
+}
+
+window.addEventListener("DOMContentLoaded", loadData);
+renderPlayers();
 
 function saveData() {
   const data = {
@@ -405,14 +421,17 @@ function saveData() {
 function loadData() {
   const data = JSON.parse(localStorage.getItem("mafiaGameData"));
   if (data) {
-    players = data.players;
-    currentStage = data.currentStage;
-    currentRoleIndex = data.currentRoleIndex;
-    editing = data.editing;
-    nightRoles = data.nightRoles;
-    rolesAssigned = data.rolesAssigned;
-    loversPair = data.loversPair;
-    renderPlayers();
+    Object.assign(players, data.players || {});
+    currentStage = data.currentStage || "SETUP";
+    currentRoleIndex = data.currentRoleIndex || 0;
+    editing = data.editing || false;
+    nightRoles = data.nightRoles || [];
+    rolesAssigned = data.rolesAssigned || false;
+    loversPair = data.loversPair || [];
   }
+  renderPlayers();
 
 }
+
+window.addEventListener("DOMContentLoaded", loadData);
+renderPlayers();

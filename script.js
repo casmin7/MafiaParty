@@ -147,14 +147,14 @@ function renderPlayers() {
 }
 
 function deletePlayer(playerName) {
-  if (confirm(`Remove ${playerName} from setup?`)) {
+  if (confirm(`Remove ${playerName} from game?`)) {
     delete players[playerName];
     renderPlayers();
   }
 }
 
 function deleteAllPlayer() {
-  if (confirm(`Remove all players from setup?`)) {
+  if (confirm(`Remove all players from game?`)) {
     for (const name in players) {
       delete players[name];
     }

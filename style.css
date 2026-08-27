@@ -12,6 +12,11 @@
   --eliminated-bg: light-dark(#e5e7eb, #18191c);
 }
 
+html, body {
+  overflow-x: hidden;
+  touch-action: manipulation;
+}
+
 body {
   background: var(--bg-color);
   color: var(--text-main);
@@ -36,6 +41,7 @@ body {
 
 .player-card {
   display: flex;
+  min-height: 54px;
   justify-content: space-between;
   align-items: center;
   padding: 14px 18px;

@@ -155,7 +155,9 @@ function deletePlayer(playerName) {
 
 function deleteAllPlayer() {
   if (confirm(`Remove all players from setup?`)) {
-    players = {};
+    for (const name in players) {
+      delete players[name];
+    }
     renderPlayers();
   }
 }

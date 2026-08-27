@@ -5,6 +5,8 @@ let  nightRoles = ["mafia"];
 let editing = false;
 let rolesAssigned = false;
 let loversPair = [];
+const nightSummary = [];
+const blockedRole = [];
 
 function editToggle() {
   editing = !editing;
@@ -148,7 +150,6 @@ function nextStage() {
     case "NIGHT":
       currentRoleIndex++;
       advanceNightRole();
-      loversPair = [];
       console.log("currentRoleIndex: " + currentRoleIndex);
       if (currentRoleIndex >= nightRoles.length) {
         resolveNightActions();
@@ -248,101 +249,92 @@ function handleCardClick(playerName) {
 }
 
 function resolveNightActions() {
-  const nightSummary = [];
+  // Clear resolution tracking state at the start
+  nightSummary.length = 0;
+  blockedRole.length = 0;
 
-  // 1. Identify who was roleblocked by the Escort
-  const blockedPlayers = Object.keys(players).filter(p =>
-    players[p].affectedBy.includes("escort")
-  );
-
+  // 1. Escort / Roleblock resolution (Must run first)
   for (const name in players) {
-    if (blockedPlayers.includes(name)) {
-      nightSummary.push(`🔞 ${players[name].role} was visited by the Escort and couldn't act!`);
+    const affected = players[name].affectedBy;
+    if (affected && affected.includes("escort") && players[name].role !== "none") {
+      nightSummary.push(`${players[name].role} spent a night with the escort`);
+      blockedRole.push(players[name].role);
     }
   }
 
-  // Helper to check if a specific role's player is currently blocked
-  const isRoleBlocked = (roleName) => {
-    const performer = Object.keys(players).find(p => players[p].role === roleName);
-    return performer && blockedPlayers.includes(performer);
-  };
-
-  // 2. Process Cupid (Only links lovers if Cupid isn't blocked)
-  if (!isRoleBlocked("cupid")) {
+  // 2. Cupid resolution (Ran once outside of player loops)
+  if (!blockedRole.includes("cupid")) {
     const cupidTargets = Object.keys(players).filter(p =>
-      players[p].affectedBy.includes("cupid")
+      players[p].affectedBy && players[p].affectedBy.includes("cupid")
     );
+
     if (cupidTargets.length === 2) {
-      nightSummary.push(`💘 Cupid linked ${cupidTargets[0]} and ${cupidTargets[1]} as Lovers!`);
+      loversPair = cupidTargets;
+      nightSummary.push(`💘 Cupid linked ${loversPair[0]} and ${loversPair[1]} as Lovers for this round!`);
     }
   }
 
-  // 3. Mutilator
-  if (!isRoleBlocked("mutilator")) {
-    for (const name in players) {
-      if (players[name].affectedBy.includes("mutilator")) {
-        if (players[name] === cupidTargets[0] || players[name] === cupidTargets[1]) {
-          nightSummary.push(`${cupidTargets[0]} and ${cupidTargets[1]} were mutilated`);
-        } else {
-          nightSummary.push(`🤐 ${name} was mutilated`);
-        }
-      }
+  // 4. Detective
+  for (const name in players) {
+    if (players[name].affectedBy.includes("detective") && !blockedRole.includes("detective")) {
+      nightSummary.push(`Detective found ${players[name].role === "mafia" ? "the mafia" : "no mafia"}`);
     }
   }
-
-  // 4. Process Detective
-  if (!isRoleBlocked("detective")) {
-    for (const name in players) {
-      if (players[name].affectedBy.includes("detective")) {
-        const isMafia = players[name].role === "mafia";
-        nightSummary.push(`🔍 Detective found ${isMafia ? "MAFIA" : "CIVILIAN"}.`);
-      }
-    }
-  }
-
-  // 5. Process Mafia Attack vs. Doctor Save
-  const mafiaBlocked = isRoleBlocked("mafia");
-  const doctorBlocked = isRoleBlocked("doctor");
 
   for (const name in players) {
-    const actions = players[name].affectedBy;
-
-    if (actions.includes("mafia")) {
-      if (mafiaBlocked) {
-        nightSummary.push(`🛡️ Mafia was roleblocked; no attack occurred!`);
-      } else if (actions.includes("doctor") && !doctorBlocked) {
-        nightSummary.push(`💉 Doctor saved ${name}!`);
+    if (players[name].affectedBy.includes("mutilator") && !blockedRole.includes("mutilator")) {
+      if (loversPair && loversPair.includes(name)) {
+        nightSummary.push(`${name} and ${loversPair[loversPair.indexOf(name) === 0 ? 1 : 0]} were silenced`);
       } else {
-        nightSummary.push(`💀 Mafia killed ${name}!`);
-        eliminatePlayer(name, nightSummary);
+        nightSummary.push(`Mutilator silenced ${name}`);
       }
     }
-
-    // Reset night action targets
-    players[name].affectedBy = [];
   }
 
-  // Alert summary
-  alert(nightSummary.length > 0 ? nightSummary.join("\n\n") : "Quiet night... nothing happened.");
-}
+  // 3. Killer / Mafia resolution
+  for (const name in players) {
+    const isTargetedByMafia = players[name].affectedBy && players[name].affectedBy.includes("mafia");
+    const isMafiaBlocked = blockedRole.includes("mafia");
 
-function eliminatePlayer(playerName, summaryArray = []) {
-  if (players[playerName].role === "eliminated") return;
+    if (isTargetedByMafia && !isMafiaBlocked) {
+      // Check if current target is in a lovers pair
+      const isLover = loversPair && loversPair.includes(name);
+      const loverPartner = isLover
+        ? loversPair[loversPair.indexOf(name) === 0 ? 1 : 0]
+        : null;
 
-  players[playerName].role = "eliminated";
+      // Check if either the target OR their lover was saved by an unblocked doctor
+      const targetSaved = players[name].affectedBy.includes("doctor");
+      const partnerSaved = loverPartner && players[loverPartner].affectedBy && players[loverPartner].affectedBy.includes("doctor");
+      const isDoctorActive = !blockedRole.includes("doctor");
 
-  // Check if this player was a Lover
-  if (loversPair.includes(playerName)) {
-    const partnerName = loversPair.find(p => p !== playerName);
-    if (partnerName && players[partnerName].role !== "eliminated") {
-      summaryArray.push(`💔 ${partnerName} died of heartbreak following ${playerName}'s death!`);
-      players[partnerName].role = "eliminated";
+      const isProtectedByDoctor = isDoctorActive && (targetSaved || partnerSaved);
+
+      if (isProtectedByDoctor) {
+        if (partnerSaved) { nightSummary.push(`The Doctor saved ${loverPartner} & ${name}!`); } else
+        nightSummary.push(`The Doctor saved ${name}!`);
+      } else if (isLover) {
+        nightSummary.push(`${name} and ${loverPartner} were both killed!`);
+        players[name].role = "eliminated";
+        players[loverPartner].role = "eliminated";
+      } else {
+        nightSummary.push(`${name} was killed`);
+        players[name].role = "eliminated";
+      }
     }
+  }
+
+  // Display summary
+  alert(nightSummary.length > 0 ? nightSummary.join("\n\n") : "Quiet night... nothing happened.");
+  for (const name in players) {
+    players[name].affectedBy = [];
+    loversPair = [];
   }
 }
 
 function advanceNightRole() {
   const activeRole = nightRoles[currentRoleIndex];
+  if (!activeRole) return;
 
   // Check if an ALIVE player has this role
   const isRoleAlive = Object.values(players).some(

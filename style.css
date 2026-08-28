@@ -187,7 +187,8 @@ body {
 
 /* Allow middle/action buttons to fill available space evenly */
 #btn_add_player,
-#btn_edit_toggle {
+#btn_edit_toggle,
+#btn_show_log {
   flex: 1;
 }
 

@@ -233,6 +233,7 @@ function nextStage() {
       break;
     case "DAY":
       currentStage = "NIGHT";
+      advanceNightRole();
       console.log("Stage changed to NIGHT");
       break;
     default:
@@ -395,20 +396,20 @@ function resolveNightActions() {
 }
 
 function advanceNightRole() {
+  // If we reached or exceeded the end of nightRoles, return to nextStage()
+  if (currentRoleIndex >= nightRoles.length) return;
+
   const activeRole = nightRoles[currentRoleIndex];
-  if (!activeRole) return;
 
   // Check if an ALIVE player has this role
   const isRoleAlive = Object.values(players).some(
     (p) => p.role === activeRole
   );
 
-  // If role is dead (and we already finished setup), skip to next role
+  // If role is dead (and setup is finished), skip to next role
   if (!isRoleAlive && rolesAssigned) {
     currentRoleIndex++;
-    if (currentRoleIndex < nightRoles.length) {
-      advanceNightRole(); // Recurse to check next role
-    }
+    advanceNightRole(); // Recurse to check the next role
   }
 }
 

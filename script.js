@@ -199,7 +199,6 @@ function nextStage() {
   switch (currentStage) {
     case "SETUP":
       document.getElementById("setup_div").style.display = "none";
-      document.getElementById("edit_div").style.visibility = "visible";
       parseInput();
       currentStage = "NIGHT";
       console.log("Stage changed to NIGHT");
@@ -447,7 +446,6 @@ function resetGame() {
 
   // Toggle UI section visibility back to setup
   document.getElementById("setup_div").style.display = "flex";
-  document.getElementById("edit_div").style.visibility = "hidden";
 
   // Re-render empty player list
   renderPlayers();
@@ -503,7 +501,6 @@ function loadData() {
 
     // 5. Sync UI elements (Buttons/Divs) based on loaded stage
     const setupDiv = document.getElementById("setup_div");
-    const editDiv = document.getElementById("edit_div");
 
     if (currentStage !== "SETUP") {
       if (setupDiv) setupDiv.style.display = "none";

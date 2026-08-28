@@ -26,6 +26,9 @@ body {
   padding: 20px;
   min-height: 100vh;
   box-sizing: border-box;
+  padding-bottom: calc(90px + env(safe-area-inset-bottom));
+  min-height: 100vh;
+  box-sizing: border-box;
 }
 
 *,
@@ -52,6 +55,7 @@ body {
 .player-card {
   display: flex;
   min-height: 54px;
+  max-height: 54px;
   justify-content: space-between;
   align-items: center;
   padding: 14px 18px;
@@ -137,8 +141,10 @@ body {
 /* Fixed Bottom Controls */
 /* Fixed Bottom Controls Container */
 #bottom_controls {
-  position: sticky;
-  bottom: 8px;
+    position: fixed;
+    bottom: calc(8px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
 
   /* Use flexbox instead of fixed 3-column grid */
   display: flex;
@@ -150,8 +156,6 @@ body {
   /* Responsive Width & Centering */
   width: calc(100% - 16px);
   max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
 
   padding: 8px;
   background-color: var(--card-bg);

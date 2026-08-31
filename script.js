@@ -513,7 +513,6 @@ function loadData() {
 
     if (currentStage !== "SETUP") {
       if (setupDiv) setupDiv.style.display = "none";
-      if (editDiv) editDiv.style.visibility = "visible";
     }
 
   } catch (error) {

@@ -7,14 +7,14 @@
 	<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="gameHeader">
+    <div id="gameHeader" role="header">
       <h2 id="stageTitle">SETUP PHASE</h2>
       <p id="roleSubTitle">Add players and select roles to begin</p>
     </div>
-    <div id="playerList">
+    <div id="playerList" role="main">
     </div>
 
-<div id="setup_div">
+<div id="setup_div" role="extra roles">
     <label><input type="checkbox" id="detectiveCheckbox">Detective</label>
     <label><input type="checkbox" id="doctorCheckbox">Doctor</label>
     <label><input type="checkbox" id="escortCheckbox">Escort</label>
@@ -22,7 +22,7 @@
     <label><input type="checkbox" id="mutilatorCheckbox">Mutilator</label>
 </div>
 <!--https://www.svgrepo.com/collection/generica-tiny-interface-icons/6-->
-<div id="bottom_controls">
+<div id="bottom_controls" role="navigation">
   <!-- SETUP STAGE BUTTONS -->
   <button id="btn_delete_all" aria-label="Delete all players" onclick="deleteAllPlayer()">
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">

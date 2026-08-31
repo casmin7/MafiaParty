@@ -8,7 +8,7 @@ let loversPair = [];
 const nightSummary = [];
 const blockedRole = [];
 
-function editToggle() {
+function editToggle()
   editing = !editing;
   renderPlayers();
 }

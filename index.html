@@ -6,12 +6,20 @@
 	<meta name="description" content="A digital assistant for Mafia game moderators. Easily assign custom roles, calculate complex night phase actions, and keep your game moving smoothly.">
 	<title>MafiaParty</title>
 	<link rel="stylesheet" href="style.css">
-	<link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
-	<link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="any" />
-	<link rel="shortcut icon" href="/favicon/favicon.ico" />
-	<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
-	<meta name="apple-mobile-web-app-title" content="Mafia" />
-	<link rel="manifest" href="/favicon/site.webmanifest" />
+	<!-- Dynamic SVG for modern browsers (switches themes using internal CSS) -->
+  <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+
+  <!-- PNG Fallbacks for light and dark themes -->
+  <link rel="icon" type="image/png" href="/favicon/favicon-light-96x96.png" sizes="96x96" media="(prefers-color-scheme: light)" />
+  <link rel="icon" type="image/png" href="/favicon/favicon-dark-96x96.png" sizes="96x96" media="(prefers-color-scheme: dark)" />
+
+  <!-- Legacy fallback for older browsers and web crawlers -->
+  <link rel="shortcut icon" href="/favicon/favicon.ico" sizes="any" />
+
+  <!-- Apple & PWA metadata -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="Mafia" />
+  <link rel="manifest" href="/favicon/site.webmanifest" />
 </head>
 <body>
     <header id="gameHeader">

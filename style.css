@@ -19,7 +19,7 @@ body {
 }
 
 html {
-    scrollbar-gutter: stable;
+    scrollbar-gutter: stable both-edges;
     box-sizing: border-box;
     overflow-y: overlay;
 }

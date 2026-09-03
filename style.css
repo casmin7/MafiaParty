@@ -18,6 +18,11 @@ body {
   touch-action: manipulation;
 }
 
+html {
+    scrollbar-gutter: stable both-edges;
+
+}
+
 body {
   background: var(--bg-color);
   color: var(--text-main);
@@ -29,7 +34,6 @@ body {
   padding-bottom: calc(90px + env(safe-area-inset-bottom));
   min-height: 100vh;
   box-sizing: border-box;
-  scrollbar-gutter: stable both-edges;
 }
 
 *,

@@ -21,7 +21,6 @@ body {
 html {
     scrollbar-gutter: stable both-edges;
     box-sizing: border-box;
-    overflow-y: overlay;
 }
 
 body {
@@ -39,6 +38,28 @@ body {
 *::after {
   box-sizing: inherit;
 }
+
+/* Width of the entire scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Transparent background track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Semi-transparent or colored draggable bar */
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 4px;
+}
+
+/* Hover state for the bar */
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
 
 #setup_div {
   display: flex;

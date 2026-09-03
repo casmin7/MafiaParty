@@ -1,5 +1,5 @@
 {
-  "name": "Mafia Helper",
+  "name": "Mafia Party",
   "short_name": "Mafia",
   "start_url": "/",
   "display": "standalone",
@@ -18,5 +18,9 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "id": "mafiaParty",
+  "dir": "ltr",
+  "lang": "en",
+  "orientation": "portrait"
 }

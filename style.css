@@ -39,7 +39,6 @@ body {
   box-sizing: inherit;
 }
 
-/* Width of the entire scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -49,15 +48,15 @@ body {
   background: transparent;
 }
 
-/* Semi-transparent or colored draggable bar */
+/* Adaptive, nice-looking draggable bar */
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: 4px;
+  background: var(--border-color);
+  border-radius: 10px; /* Matches your card-border radius smoothness */
 }
 
-/* Hover state for the bar */
+/* Slight opacity boost on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.7);
+  filter: brightness(0.8);
 }
 
 

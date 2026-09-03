@@ -19,8 +19,10 @@ body {
 }
 
 html {
-    scrollbar-gutter: stable both-edges;
-    box-sizing: border-box;
+  scrollbar-gutter: stable both-edges;
+  box-sizing: border-box;
+  scrollbar-color: var(--border-color) transparent;
+  scrollbar-width: thin;
 }
 
 body {

@@ -2,10 +2,14 @@ const CACHE_NAME = 'mafia-party-cache-v1';
 const ASSETS = [
   '/',
   '/index.html',
-  '/styles.css',
+  '/style.css',
   '/script.js',
-  '/favicon/*',
   '/favicon.ico'
+  '/favicon/favicon.ico',
+  '/favicon/favicon.png',
+  '/favicon/favicon.svg',
+  '/favicon/site.webmanifest',
+  '/favicon/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (event) => {

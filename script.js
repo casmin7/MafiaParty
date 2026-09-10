@@ -356,6 +356,20 @@ function handleCardClick(playerName) {
   }
 
   if (currentStage === "NIGHT" && !editing) {
+    // Checks if the active role is alive
+    const activeRole = nightRoles[currentRoleIndex];
+
+        // Check if at least one living player has the active night role
+        const isRoleAlive = Object.values(players).some(
+          (p) => p.role === activeRole
+        );
+
+        // If no active living player holds this role, prevent selecting a target
+        if (!isRoleAlive) {
+          alert(`There is no living ${activeRole.toUpperCase()} to select a target!`);
+          return;
+        }
+
     const actionIndex = players[playerName].affectedBy.indexOf(activeRole);
 
     if (actionIndex > -1) {
@@ -455,14 +469,20 @@ function clearAllTargets() {
 function advanceNightRole() {
   if (currentRoleIndex >= nightRoles.length) return;
 
-  const activeRole = nightRoles[currentRoleIndex];
-  const isRoleAlive = Object.values(players).some(p => p.role === activeRole);
+  const autoSkip = document.getElementById("autoAdvanceCheckbox")?.checked ?? true;
 
-  if (!isRoleAlive && rolesAssigned) {
-    currentRoleIndex++;
-    advanceNightRole();
+  if (autoSkip) {
+    const activeRole = nightRoles[currentRoleIndex];
+    const isRoleAlive = Object.values(players).some(p => p.role === activeRole);
+
+    if (!isRoleAlive && rolesAssigned) {
+      currentRoleIndex++;
+      advanceNightRole();
+    }
   }
 }
+
+
 
 function previousStage() {
   if (historyStack.length === 0) return;
@@ -540,7 +560,14 @@ function showLog() {
 }
 
 function saveCheckboxState() {
-  const checkboxIds = ["detectiveCheckbox", "doctorCheckbox", "escortCheckbox", "cupidCheckbox", "mutilatorCheckbox"];
+  const checkboxIds = [
+    "detectiveCheckbox",
+    "doctorCheckbox",
+    "escortCheckbox",
+    "cupidCheckbox",
+    "mutilatorCheckbox",
+
+  ];
   const checkboxState = {};
   checkboxIds.forEach(id => {
     const el = document.getElementById(id);

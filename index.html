@@ -36,11 +36,50 @@
 
 
     <div id="setup_div">
-        <label><input type="checkbox" id="detectiveCheckbox" onchange="saveCheckboxState()">Detective</label>
-        <label><input type="checkbox" id="doctorCheckbox" onchange="saveCheckboxState()">Doctor</label>
-        <label><input type="checkbox" id="escortCheckbox" onchange="saveCheckboxState()">Escort</label>
-        <label><input type="checkbox" id="cupidCheckbox" onchange="saveCheckboxState()">Cupid</label>
-        <label><input type="checkbox" id="mutilatorCheckbox" onchange="saveCheckboxState()">Mutilator</label>
+        <div class="setup-grid">
+          <!-- Column 1: Active Roles -->
+          <div class="setup-column">
+            <h2>Active Roles</h2>
+
+            <label class="m3-switch-label">
+              <span>Detective</span>
+              <input type="checkbox" id="detectiveCheckbox" class="m3-switch" onchange="saveCheckboxState()">
+              <span class="m3-switch-track"><span class="m3-switch-thumb"></span></span>
+            </label>
+
+            <label class="m3-switch-label">
+              <span>Doctor</span>
+              <input type="checkbox" id="doctorCheckbox" class="m3-switch" onchange="saveCheckboxState()">
+              <span class="m3-switch-track"><span class="m3-switch-thumb"></span></span>
+            </label>
+
+            <label class="m3-switch-label">
+              <span>Escort</span>
+              <input type="checkbox" id="escortCheckbox" class="m3-switch" onchange="saveCheckboxState()">
+              <span class="m3-switch-track"><span class="m3-switch-thumb"></span></span>
+            </label>
+
+            <label class="m3-switch-label">
+              <span>Cupid</span>
+              <input type="checkbox" id="cupidCheckbox" class="m3-switch" onchange="saveCheckboxState()">
+              <span class="m3-switch-track"><span class="m3-switch-thumb"></span></span>
+            </label>
+
+            <label class="m3-switch-label">
+              <span>Mutilator</span>
+              <input type="checkbox" id="mutilatorCheckbox" class="m3-switch" onchange="saveCheckboxState()">
+              <span class="m3-switch-track"><span class="m3-switch-thumb"></span></span>
+            </label>
+          </div>
+
+          <!-- Column 2: Optional Settings -->
+          <div class="setup-column">
+            <h2>Optional Settings</h2>
+
+            <!-- Add future game options here -->
+            <p class="placeholder-text">No additional settings enabled.</p>
+          </div>
+        </div>
     </div>
 <!--https://www.svgrepo.com/collection/generica-tiny-interface-icons/6-->
 <nav id="bottom_controls" aria-label="Game Controls">

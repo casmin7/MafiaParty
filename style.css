@@ -8,7 +8,7 @@
   --text-main: light-dark(#1a1a1e, #e6e8ec);
   --border-color: light-dark(#d0d5dd, #333742);
   --accent-role: light-dark(#9b111e, #e63946);
-  --villager-role: light-dark(#006633, #39ff14);
+  --villager-role: light-dark(#15803d, #22c55e);
   --eliminated-bg: light-dark(#e5e7eb, #18191c);
 }
 
@@ -73,7 +73,6 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 10px;
   padding: 0;
-  margin: 20px 0;
 }
 
 /* Card Component */
@@ -227,4 +226,103 @@ body {
 #bottom_controls button:active {
   background-color: var(--card-active);
   transform: scale(0.98);
+}
+
+
+/* Grid Layout for Setup */
+.setup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.setup-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: var(--card-bg);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.setup-column h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.placeholder-text {
+  font-size: 0.9rem;
+  opacity: 0.6;
+  margin: 0;
+}
+
+/* Material 3 Switch Container */
+.m3-switch-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 6px 0;
+  user-select: none;
+  font-size: 1rem;
+}
+
+/* Hide Native Checkbox */
+.m3-switch {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Switch Track */
+.m3-switch-track {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 32px;
+  background-color: light-dark(#e1e2e5, #333742);
+  border: 2px solid light-dark(#74777f, #8e9099);
+  border-radius: 16px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+/* Switch Thumb */
+.m3-switch-thumb {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  background-color: light-dark(#74777f, #8e9099);
+  border-radius: 50%;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1),
+              width 0.15s ease,
+              height 0.15s ease,
+              background-color 0.2s ease;
+}
+
+/* Checked State Track */
+.m3-switch:checked + .m3-switch-track {
+  background-color: var(--villager-role);
+  border-color: var(--villager-role);
+}
+
+/* Checked State Thumb Expansion (M3 spec expands thumb on selection) */
+.m3-switch:checked + .m3-switch-track .m3-switch-thumb {
+  transform: translate(18px, -50%);
+  width: 24px;
+  height: 24px;
+  background-color: light-dark(#ffffff, #121316);
+}
+
+/* Active Press Scaling Effect */
+.m3-switch-label:active .m3-switch-thumb {
+  width: 26px;
 }

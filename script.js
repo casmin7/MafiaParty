@@ -1,44 +1,41 @@
 const players = {};
 let currentStage = "SETUP";
 let currentRoleIndex = 0;
-let  nightRoles = ["mafia"];
+let nightRoles = ["mafia"];
 let editing = false;
 let rolesAssigned = false;
 let loversPair = [];
-const nightSummary = [];
+let nightSummary = [];
 const blockedRole = [];
+
+// Snapshot used to undo deaths and night actions when going back from DAY to NIGHT
+let previousNightSnapshot = null;
 
 function editToggle() {
   editing = !editing;
   renderPlayers();
 }
 
-// Initial game state, adding players
 function addPlayer() {
-  const playerName = prompt("Enter player name:").trim();
+  const playerName = prompt("Enter player name:")?.trim();
+  if (!playerName) return;
   if (players.hasOwnProperty(playerName)) {
     alert("Player already exists!");
     return;
   }
-  if (playerName) {
-    players[playerName] = {
-      name: playerName,
-      role: "none",
-      affectedBy: [],
-    };
-  }
+  players[playerName] = {
+    name: playerName,
+    role: "none",
+    affectedBy: [],
+  };
   renderPlayers();
-  for (const name in players) {
-    console.log(name, players[name].role);
-  }
 }
 
-// DOM rendering of player list
 function renderPlayers() {
-  // Header
   const stageTitle = document.getElementById("stageTitle");
   const roleSubTitle = document.getElementById("roleSubTitle");
   saveData();
+
   if (stageTitle && roleSubTitle) {
     if (currentStage === "SETUP") {
       stageTitle.textContent = "SETUP PHASE";
@@ -63,7 +60,6 @@ function renderPlayers() {
   const editStatusText = document.getElementById("edit_status_text");
   const btnShowLog = document.getElementById("btn_show_log");
 
-  // Stage-based visibility rules
   if (currentStage === "SETUP") {
     if (btnDeleteAll) btnDeleteAll.style.display = "inline-flex";
     if (btnAddPlayer) btnAddPlayer.style.display = "inline-flex";
@@ -76,29 +72,26 @@ function renderPlayers() {
     if (btnAddPlayer) btnAddPlayer.style.display = "none";
     if (btnPrevStage) btnPrevStage.style.display = "inline-flex";
     if (btnEditToggle) btnEditToggle.style.display = "inline-flex";
-    if (btnResetGame) btnResetGame.style.display = "inline-flex"; // Visible during Night
+    if (btnResetGame) btnResetGame.style.display = "inline-flex";
     if (btnShowLog) btnShowLog.style.display = "none";
 
-      if (editStatusText) {
-        editStatusText.textContent = editing ? "Done Editing" : "Edit Roles";
-      }
-    } else if (currentStage === "DAY") {
-      if (btnDeleteAll) btnDeleteAll.style.display = "none";
-      if (btnAddPlayer) btnAddPlayer.style.display = "none";
-      if (btnPrevStage) btnPrevStage.style.display = "inline-flex";
-      if (btnEditToggle) btnEditToggle.style.display = "none";      // Hidden during Day
-      if (btnResetGame) btnResetGame.style.display = "inline-flex";
-      if (btnShowLog) btnShowLog.style.display = "inline-flex";
+    if (editStatusText) {
+      editStatusText.textContent = editing ? "Done Editing" : "Edit Roles";
     }
+  } else if (currentStage === "DAY") {
+    if (btnDeleteAll) btnDeleteAll.style.display = "none";
+    if (btnAddPlayer) btnAddPlayer.style.display = "none";
+    if (btnPrevStage) btnPrevStage.style.display = "inline-flex";
+    if (btnEditToggle) btnEditToggle.style.display = "none";
+    if (btnResetGame) btnResetGame.style.display = "inline-flex";
+    if (btnShowLog) btnShowLog.style.display = "inline-flex";
+  }
 
-  // Player List
   const playerList = document.getElementById("playerList");
   if (!playerList) return;
 
-  // Clear list
   playerList.innerHTML = "";
 
-  // Render players
   for (const name in players) {
     const li = document.createElement("li");
     li.className = "player-card";
@@ -107,20 +100,15 @@ function renderPlayers() {
     const roleSpan = document.createElement("span");
 
     nameSpan.textContent = name;
-
     roleSpan.className = "hiddenInfo";
     roleSpan.textContent = players[name].role;
 
-    // Role normalization and attribution for use in CSS
     const normalizedRole = players[name].role.toLowerCase().trim();
     li.dataset.role = normalizedRole;
 
     const assignedRole = players[name].role;
-
-    // Get the role active right now
     const activeRole = nightRoles[currentRoleIndex];
 
-    // If this player has been given the active role, mark their card!
     if (currentStage === "NIGHT" && assignedRole === activeRole) {
       li.classList.add("selected");
       roleSpan.classList.add("revealed");
@@ -129,7 +117,6 @@ function renderPlayers() {
       roleSpan.classList.remove("revealed");
     }
 
-    // --- Targeted player ---
     if (!editing && currentStage === "NIGHT" && players[name].affectedBy.includes(activeRole)) {
       li.classList.add("targeted");
     } else {
@@ -143,22 +130,16 @@ function renderPlayers() {
     };
 
     const hideRole = () => {
-      // Don't hide the text if the card is currently selected in NIGHT
       if (currentStage === "NIGHT" && players[name].role === activeRole) {
         return;
       }
       roleSpan.classList.remove("revealed");
     };
 
-    // Clean single event assignment
-    li.addEventListener("click", () => {
-      handleCardClick(name);
-    });
-
+    li.addEventListener("click", () => handleCardClick(name));
     li.addEventListener("mousedown", showRole);
     li.addEventListener("mouseup", hideRole);
     li.addEventListener("mouseleave", hideRole);
-
     li.addEventListener("touchstart", showRole, { passive: true });
     li.addEventListener("touchend", hideRole);
     li.addEventListener("touchcancel", hideRole);
@@ -166,7 +147,6 @@ function renderPlayers() {
     li.appendChild(nameSpan);
     li.appendChild(roleSpan);
 
-    // delete button
     if (currentStage === "SETUP") {
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "✕";
@@ -198,68 +178,64 @@ function deleteAllPlayer() {
   }
 }
 
-// Stages
 function nextStage() {
   switch (currentStage) {
     case "SETUP":
       document.getElementById("setup_div").style.display = "none";
       parseInput();
       currentStage = "NIGHT";
-      console.log("Stage changed to NIGHT");
       editing = true;
-      console.log("currentRoleIndex: " + currentRoleIndex);
       break;
+
     case "NIGHT":
       currentRoleIndex++;
       advanceNightRole();
-      console.log("currentRoleIndex: " + currentRoleIndex);
+
       if (currentRoleIndex >= nightRoles.length) {
+        // Create deep snapshot before resolving actions so we can rewind cleanly
+        previousNightSnapshot = JSON.parse(JSON.stringify(players));
+
         resolveNightActions();
         currentStage = "DAY";
-        currentRoleIndex = 0; // Reset for future nights
-        console.log("Stage changed to DAY");
+        currentRoleIndex = 0;
         editing = false;
         rolesAssigned = true;
       } else {
         const activeRole = nightRoles[currentRoleIndex];
-
         if (!rolesAssigned) {
           const roleExists = Object.values(players).some(p => p.role === activeRole);
           editing = !roleExists;
         } else {
-          editing = false; // Night setup complete, stay in action/targeting mode
+          editing = false;
         }
       }
       break;
+
     case "DAY":
       currentStage = "NIGHT";
       advanceNightRole();
-      console.log("Stage changed to NIGHT");
       break;
+
     default:
       currentStage = "SETUP";
-      console.log("Stage changed to SETUP");
       break;
   }
   renderPlayers();
 }
 
 function parseInput() {
-  // Reset array to ensure a clean sequence on every run
   nightRoles.length = 0;
 
-  // Roles in exact desired turn sequence
   const roleSequence = [
-    { id: "escortCheckbox", role: "escort" },       // 1st: Roleblocker
-    { id: "cupidCheckbox", role: "cupid" },         // 2nd: Matchmaker
-    { id: "mutilatorCheckbox", role: "mutilator" }, // 3rd: Silencer
-    { id: null, role: "mafia" },                    // 4th: Mafia (Always included)
-    { id: "detectiveCheckbox", role: "detective" }, // 5th: Investigator
-    { id: "doctorCheckbox", role: "doctor" }        // 6th: Saver
+    { id: "escortCheckbox", role: "escort" },
+    { id: "cupidCheckbox", role: "cupid" },
+    { id: "mutilatorCheckbox", role: "mutilator" },
+    { id: null, role: "mafia" },
+    { id: "detectiveCheckbox", role: "detective" },
+    { id: "doctorCheckbox", role: "doctor" }
   ];
 
   roleSequence.forEach(item => {
-    // If it's Mafia (no element required) OR the checkbox is checked in DOM
     if (item.role === "mafia") {
       nightRoles.push("mafia");
     } else {
@@ -275,7 +251,6 @@ function handleCardClick(playerName) {
   if (players[playerName].role === "eliminated") return;
   const activeRole = nightRoles[currentRoleIndex];
 
-  // DAY PHASE: Click to eliminate
   if (currentStage === "DAY") {
     if (confirm(`Eliminate ${playerName}?`)) {
       players[playerName].role = "eliminated";
@@ -287,24 +262,19 @@ function handleCardClick(playerName) {
   if (currentStage === "NIGHT" && editing) {
     if (players[playerName].role === activeRole) {
       players[playerName].role = "none";
-    }
-    // 2. If they are currently unassigned, give them the active role
-    else if (players[playerName].role === "none") {
+    } else if (players[playerName].role === "none") {
       players[playerName].role = activeRole;
-    }
-    // 3. If they already have a DIFFERENT role, alert or block reassignment
-    else {
+    } else {
       alert(`${playerName} is already assigned as ${players[playerName].role}!`);
     }
   }
+
   if (currentStage === "NIGHT" && !editing) {
     const actionIndex = players[playerName].affectedBy.indexOf(activeRole);
 
     if (actionIndex > -1) {
-      // Already affected by this role -> unselect (remove from array)
       players[playerName].affectedBy.splice(actionIndex, 1);
     } else {
-      // Not affected yet -> add active role to array
       players[playerName].affectedBy.push(activeRole);
     }
   }
@@ -312,11 +282,9 @@ function handleCardClick(playerName) {
 }
 
 function resolveNightActions() {
-  // Clear resolution tracking state at the start
   nightSummary.length = 0;
   blockedRole.length = 0;
 
-  // 1. Escort / Roleblock resolution (Must run first)
   for (const name in players) {
     const affected = players[name].affectedBy;
     if (affected && affected.includes("escort") && players[name].role !== "none") {
@@ -325,7 +293,6 @@ function resolveNightActions() {
     }
   }
 
-  // 2. Cupid resolution (Ran once outside of player loops)
   if (!blockedRole.includes("cupid")) {
     const cupidTargets = Object.keys(players).filter(p =>
       players[p].affectedBy && players[p].affectedBy.includes("cupid")
@@ -337,7 +304,6 @@ function resolveNightActions() {
     }
   }
 
-  // 4. Detective
   for (const name in players) {
     if (players[name].affectedBy.includes("detective") && !blockedRole.includes("detective")) {
       nightSummary.push(`Detective found ${players[name].role === "mafia" ? "the mafia" : "no mafia"}`);
@@ -354,19 +320,16 @@ function resolveNightActions() {
     }
   }
 
-  // 3. Killer / Mafia resolution
   for (const name in players) {
     const isTargetedByMafia = players[name].affectedBy && players[name].affectedBy.includes("mafia");
     const isMafiaBlocked = blockedRole.includes("mafia");
 
     if (isTargetedByMafia && !isMafiaBlocked) {
-      // Check if current target is in a lovers pair
       const isLover = loversPair && loversPair.includes(name);
       const loverPartner = isLover
         ? loversPair[loversPair.indexOf(name) === 0 ? 1 : 0]
         : null;
 
-      // Check if either the target OR their lover was saved by an unblocked doctor
       const targetSaved = players[name].affectedBy.includes("doctor");
       const partnerSaved = loverPartner && players[loverPartner].affectedBy && players[loverPartner].affectedBy.includes("doctor");
       const isDoctorActive = !blockedRole.includes("doctor");
@@ -374,8 +337,11 @@ function resolveNightActions() {
       const isProtectedByDoctor = isDoctorActive && (targetSaved || partnerSaved);
 
       if (isProtectedByDoctor) {
-        if (partnerSaved) { nightSummary.push(`The Doctor saved ${loverPartner} & ${name}!`); } else
-        nightSummary.push(`The Doctor saved ${name}!`);
+        if (partnerSaved) {
+          nightSummary.push(`The Doctor saved ${loverPartner} & ${name}!`);
+        } else {
+          nightSummary.push(`The Doctor saved ${name}!`);
+        }
       } else if (isLover) {
         nightSummary.push(`${name} and ${loverPartner} were both killed!`);
         players[name].role = "eliminated";
@@ -387,29 +353,26 @@ function resolveNightActions() {
     }
   }
 
-  // Display summary
   alert(nightSummary.length > 0 ? nightSummary.join("\n\n") : "Quiet night... nothing happened.");
+
+  // Clear affected target states for the next night cycle
   for (const name in players) {
-    players[name].affectedBy = [];
-    loversPair = [];
+    if (players[name].role !== "eliminated") {
+      players[name].affectedBy = [];
+    }
   }
+  loversPair = [];
 }
 
 function advanceNightRole() {
-  // If we reached or exceeded the end of nightRoles, return to nextStage()
   if (currentRoleIndex >= nightRoles.length) return;
 
   const activeRole = nightRoles[currentRoleIndex];
+  const isRoleAlive = Object.values(players).some(p => p.role === activeRole);
 
-  // Check if an ALIVE player has this role
-  const isRoleAlive = Object.values(players).some(
-    (p) => p.role === activeRole
-  );
-
-  // If role is dead (and setup is finished), skip to next role
   if (!isRoleAlive && rolesAssigned) {
     currentRoleIndex++;
-    advanceNightRole(); // Recurse to check the next role
+    advanceNightRole();
   }
 }
 
@@ -423,6 +386,13 @@ function previousStage() {
       editing = false;
     }
   } else if (currentStage === "DAY") {
+    // Restore pre-night snapshot if available (resurrects victims & restores night selections)
+    if (previousNightSnapshot) {
+      for (const name in previousNightSnapshot) {
+        players[name] = JSON.parse(JSON.stringify(previousNightSnapshot[name]));
+      }
+    }
+
     currentStage = "NIGHT";
     currentRoleIndex = nightRoles.length - 1;
   }
@@ -432,32 +402,52 @@ function previousStage() {
 function resetGame() {
   if (!confirm("Are you sure you want to reset the entire game?")) return;
 
-  // Clear player data
   for (const name in players) {
     players[name].role = "none";
     players[name].affectedBy = [];
   }
 
-  // Reset state variables
   currentStage = "SETUP";
   currentRoleIndex = 0;
   editing = false;
   nightRoles.length = 0;
-  nightRoles.push("mafia"); // Keep base role
+  nightRoles.push("mafia");
   rolesAssigned = false;
+  nightSummary.length = 0;
+  previousNightSnapshot = null;
 
-  // Remove storage
   localStorage.removeItem("mafiaGameData");
-
-  // Toggle UI section visibility back to setup
   document.getElementById("setup_div").style.display = "flex";
-
-  // Re-render empty player list
   renderPlayers();
 }
 
 function showLog() {
   alert(nightSummary.length > 0 ? nightSummary.join("\n\n") : "Quiet night... nothing happened.");
+}
+
+function saveCheckboxState() {
+  const checkboxIds = ["detectiveCheckbox", "doctorCheckbox", "escortCheckbox", "cupidCheckbox", "mutilatorCheckbox"];
+  const checkboxState = {};
+  checkboxIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) checkboxState[id] = el.checked;
+  });
+  localStorage.setItem("mafiaCheckboxState", JSON.stringify(checkboxState));
+}
+
+function loadCheckboxState() {
+  const savedState = localStorage.getItem("mafiaCheckboxState");
+  if (!savedState) return;
+
+  try {
+    const checkboxState = JSON.parse(savedState);
+    for (const id in checkboxState) {
+      const el = document.getElementById(id);
+      if (el) el.checked = checkboxState[id];
+    }
+  } catch (err) {
+    console.error("Failed to parse checkbox state:", err);
+  }
 }
 
 function saveData() {
@@ -468,12 +458,16 @@ function saveData() {
     editing: editing,
     nightRoles: nightRoles,
     rolesAssigned: rolesAssigned,
-    loversPair: loversPair
+    loversPair: loversPair,
+    nightSummary: nightSummary,
+    previousNightSnapshot: previousNightSnapshot
   };
   localStorage.setItem("mafiaGameData", JSON.stringify(data));
 }
 
 function loadData() {
+  loadCheckboxState();
+
   const savedString = localStorage.getItem("mafiaGameData");
   if (!savedString) {
     renderPlayers();
@@ -483,24 +477,26 @@ function loadData() {
   try {
     const data = JSON.parse(savedString);
 
-    // 1. Clear current players object completely before restoring
     for (const key in players) {
       delete players[key];
     }
 
-    // 2. Restore players object
     if (data.players) {
       Object.assign(players, data.players);
     }
 
-    // 3. Restore primitive states
     currentStage = data.currentStage || "SETUP";
     currentRoleIndex = data.currentRoleIndex || 0;
     editing = data.editing || false;
     rolesAssigned = data.rolesAssigned || false;
     loversPair = data.loversPair || [];
+    previousNightSnapshot = data.previousNightSnapshot || null;
 
-    // 4. Restore nightRoles array safely
+    if (Array.isArray(data.nightSummary)) {
+      nightSummary.length = 0;
+      nightSummary.push(...data.nightSummary);
+    }
+
     nightRoles.length = 0;
     if (Array.isArray(data.nightRoles)) {
       nightRoles.push(...data.nightRoles);
@@ -508,32 +504,22 @@ function loadData() {
       nightRoles.push("mafia");
     }
 
-    // 5. Sync UI elements (Buttons/Divs) based on loaded stage
     const setupDiv = document.getElementById("setup_div");
-
-    if (currentStage !== "SETUP") {
-      if (setupDiv) setupDiv.style.display = "none";
+    if (currentStage !== "SETUP" && setupDiv) {
+      setupDiv.style.display = "none";
     }
 
   } catch (error) {
     console.error("Failed to parse saved game data:", error);
   }
 
-  // Render after all data and UI states are restored
   renderPlayers();
 }
 
-// Load data automatically when the page finishes loading
 window.addEventListener("DOMContentLoaded", loadData);
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
-        console.log('Service Worker registered:', registration);
-      })
-      .catch((error) => {
-        console.error('Service Worker registration failed:', error);
-      });
+    navigator.serviceWorker.register('/sw.js').catch(err => console.error(err));
   });
 }

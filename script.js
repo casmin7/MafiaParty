@@ -8,7 +8,7 @@ let loversPair = [];
 let nightSummary = [];
 const blockedRole = [];
 
-// Stack to hold all previous game states for unlimited undo
+const MAX_HISTORY_DEPTH = 30;
 const historyStack = [];
 
 function saveHistoryState() {
@@ -23,12 +23,16 @@ function saveHistoryState() {
     nightRoles: [...nightRoles]
   };
   historyStack.push(snapshot);
+  if (historyStack.length > MAX_HISTORY_DEPTH) {
+    historyStack.shift();
+  }
 }
 
 function editToggle() {
   saveHistoryState();
   editing = !editing;
   renderPlayers();
+  saveData();
 }
 
 function addPlayer() {
@@ -45,12 +49,12 @@ function addPlayer() {
     affectedBy: [],
   };
   renderPlayers();
+  saveData();
 }
 
 function renderPlayers() {
   const stageTitle = document.getElementById("stageTitle");
   const roleSubTitle = document.getElementById("roleSubTitle");
-  saveData();
 
   if (stageTitle && roleSubTitle) {
     if (currentStage === "SETUP") {
@@ -153,12 +157,10 @@ function renderPlayers() {
     };
 
     li.addEventListener("click", () => handleCardClick(name));
-    li.addEventListener("mousedown", showRole);
-    li.addEventListener("mouseup", hideRole);
-    li.addEventListener("mouseleave", hideRole);
-    li.addEventListener("touchstart", showRole, { passive: true });
-    li.addEventListener("touchend", hideRole);
-    li.addEventListener("touchcancel", hideRole);
+    li.addEventListener("pointerdown", showRole);
+    li.addEventListener("pointerup", hideRole);
+    li.addEventListener("pointerleave", hideRole);
+    li.addEventListener("pointercancel", hideRole);
 
     li.appendChild(nameSpan);
     li.appendChild(roleSpan);
@@ -183,6 +185,7 @@ function deletePlayer(playerName) {
     saveHistoryState();
     delete players[playerName];
     renderPlayers();
+    saveData();
   }
 }
 
@@ -193,6 +196,7 @@ function deleteAllPlayer() {
       delete players[name];
     }
     renderPlayers();
+    saveData();
   }
 }
 
@@ -230,7 +234,6 @@ function nextStage() {
       break;
 
     case "DAY":
-      // Clear previous night targets when starting a brand-new night from Day phase
       clearAllTargets();
       nightSummary.length = 0;
       currentStage = "NIGHT";
@@ -242,6 +245,7 @@ function nextStage() {
       break;
   }
   renderPlayers();
+  saveData();
 }
 
 function parseInput() {
@@ -275,16 +279,17 @@ function handleCardClick(playerName) {
 
   if (currentStage === "DAY") {
     if (confirm(`Eliminate ${playerName}?`)) {
-      saveHistoryState(); // Keep history for eliminations
+      saveHistoryState();
       players[playerName].role = "eliminated";
       renderPlayers();
+      saveData();
       checkWinCondition();
     }
     return;
   }
 
   if (currentStage === "NIGHT" && editing) {
-    saveHistoryState(); // Keep history for role assignment edits
+    saveHistoryState();
     if (players[playerName].role === activeRole) {
       players[playerName].role = "none";
     } else if (players[playerName].role === "none") {
@@ -295,7 +300,6 @@ function handleCardClick(playerName) {
   }
 
   if (currentStage === "NIGHT" && !editing) {
-    // REMOVED saveHistoryState() from here so target toggles aren't tracked as separate steps
     const actionIndex = players[playerName].affectedBy.indexOf(activeRole);
 
     if (actionIndex > -1) {
@@ -305,6 +309,7 @@ function handleCardClick(playerName) {
     }
   }
   renderPlayers();
+  saveData();
 }
 
 function resolveNightActions() {
@@ -381,7 +386,6 @@ function resolveNightActions() {
 
   alert(nightSummary.length > 0 ? nightSummary.join("\n\n") : "Quiet night... nothing happened.");
 
-  // Clear affected target states completely for all players
   clearAllTargets();
   loversPair = [];
 }
@@ -430,6 +434,7 @@ function previousStage() {
   }
 
   renderPlayers();
+  saveData();
 }
 
 function checkWinCondition() {

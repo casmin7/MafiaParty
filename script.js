@@ -8,10 +8,25 @@ let loversPair = [];
 let nightSummary = [];
 const blockedRole = [];
 
-// Snapshot used to undo deaths and night actions when going back from DAY to NIGHT
-let previousNightSnapshot = null;
+// Stack to hold all previous game states for unlimited undo
+const historyStack = [];
+
+function saveHistoryState() {
+  const snapshot = {
+    players: JSON.parse(JSON.stringify(players)),
+    currentStage,
+    currentRoleIndex,
+    editing,
+    rolesAssigned,
+    loversPair: [...loversPair],
+    nightSummary: [...nightSummary],
+    nightRoles: [...nightRoles]
+  };
+  historyStack.push(snapshot);
+}
 
 function editToggle() {
+  saveHistoryState();
   editing = !editing;
   renderPlayers();
 }
@@ -23,6 +38,7 @@ function addPlayer() {
     alert("Player already exists!");
     return;
   }
+  saveHistoryState();
   players[playerName] = {
     name: playerName,
     role: "none",
@@ -164,6 +180,7 @@ function renderPlayers() {
 
 function deletePlayer(playerName) {
   if (confirm(`Remove ${playerName} from game?`)) {
+    saveHistoryState();
     delete players[playerName];
     renderPlayers();
   }
@@ -171,6 +188,7 @@ function deletePlayer(playerName) {
 
 function deleteAllPlayer() {
   if (confirm(`Remove all players from game?`)) {
+    saveHistoryState();
     for (const name in players) {
       delete players[name];
     }
@@ -179,6 +197,8 @@ function deleteAllPlayer() {
 }
 
 function nextStage() {
+  saveHistoryState();
+
   switch (currentStage) {
     case "SETUP":
       document.getElementById("setup_div").style.display = "none";
@@ -192,14 +212,12 @@ function nextStage() {
       advanceNightRole();
 
       if (currentRoleIndex >= nightRoles.length) {
-        // Create deep snapshot before resolving actions so we can rewind cleanly
-        previousNightSnapshot = JSON.parse(JSON.stringify(players));
-
         resolveNightActions();
         currentStage = "DAY";
         currentRoleIndex = 0;
         editing = false;
         rolesAssigned = true;
+        checkWinCondition();
       } else {
         const activeRole = nightRoles[currentRoleIndex];
         if (!rolesAssigned) {
@@ -212,6 +230,9 @@ function nextStage() {
       break;
 
     case "DAY":
+      // Clear previous night targets when starting a brand-new night from Day phase
+      clearAllTargets();
+      nightSummary.length = 0;
       currentStage = "NIGHT";
       advanceNightRole();
       break;
@@ -249,17 +270,21 @@ function parseInput() {
 
 function handleCardClick(playerName) {
   if (players[playerName].role === "eliminated") return;
+
   const activeRole = nightRoles[currentRoleIndex];
 
   if (currentStage === "DAY") {
     if (confirm(`Eliminate ${playerName}?`)) {
+      saveHistoryState(); // Keep history for eliminations
       players[playerName].role = "eliminated";
       renderPlayers();
+      checkWinCondition();
     }
     return;
   }
 
   if (currentStage === "NIGHT" && editing) {
+    saveHistoryState(); // Keep history for role assignment edits
     if (players[playerName].role === activeRole) {
       players[playerName].role = "none";
     } else if (players[playerName].role === "none") {
@@ -270,6 +295,7 @@ function handleCardClick(playerName) {
   }
 
   if (currentStage === "NIGHT" && !editing) {
+    // REMOVED saveHistoryState() from here so target toggles aren't tracked as separate steps
     const actionIndex = players[playerName].affectedBy.indexOf(activeRole);
 
     if (actionIndex > -1) {
@@ -355,13 +381,15 @@ function resolveNightActions() {
 
   alert(nightSummary.length > 0 ? nightSummary.join("\n\n") : "Quiet night... nothing happened.");
 
-  // Clear affected target states for the next night cycle
-  for (const name in players) {
-    if (players[name].role !== "eliminated") {
-      players[name].affectedBy = [];
-    }
-  }
+  // Clear affected target states completely for all players
+  clearAllTargets();
   loversPair = [];
+}
+
+function clearAllTargets() {
+  for (const name in players) {
+    players[name].affectedBy = [];
+  }
 }
 
 function advanceNightRole() {
@@ -377,26 +405,47 @@ function advanceNightRole() {
 }
 
 function previousStage() {
-  if (currentStage === "NIGHT") {
-    if (currentRoleIndex > 0) {
-      currentRoleIndex--;
-    } else {
-      currentStage = "SETUP";
-      document.getElementById("setup_div").style.display = "flex";
-      editing = false;
-    }
-  } else if (currentStage === "DAY") {
-    // Restore pre-night snapshot if available (resurrects victims & restores night selections)
-    if (previousNightSnapshot) {
-      for (const name in previousNightSnapshot) {
-        players[name] = JSON.parse(JSON.stringify(previousNightSnapshot[name]));
-      }
-    }
+  if (historyStack.length === 0) return;
 
-    currentStage = "NIGHT";
-    currentRoleIndex = nightRoles.length - 1;
+  const previousState = historyStack.pop();
+
+  currentStage = previousState.currentStage;
+  currentRoleIndex = previousState.currentRoleIndex;
+  editing = previousState.editing;
+  rolesAssigned = previousState.rolesAssigned;
+  loversPair = previousState.loversPair;
+  nightSummary = previousState.nightSummary;
+
+  nightRoles.length = 0;
+  nightRoles.push(...previousState.nightRoles);
+
+  for (const key in players) {
+    delete players[key];
   }
+  Object.assign(players, previousState.players);
+
+  const setupDiv = document.getElementById("setup_div");
+  if (setupDiv) {
+    setupDiv.style.display = currentStage === "SETUP" ? "flex" : "none";
+  }
+
   renderPlayers();
+}
+
+function checkWinCondition() {
+  if (currentStage === "SETUP") return;
+
+  const livingPlayers = Object.values(players).filter(p => p.role !== "eliminated");
+  if (livingPlayers.length === 0) return;
+
+  const livingMafia = livingPlayers.filter(p => p.role === "mafia").length;
+  const livingTown = livingPlayers.length - livingMafia;
+
+  if (livingMafia === 0) {
+    alert("🎉 TOWN WINS! All Mafia members have been eliminated.");
+  } else if (livingMafia >= livingTown) {
+    alert("🔪 MAFIA WINS! Mafia members equal or outnumber the Town.");
+  }
 }
 
 function resetGame() {
@@ -414,7 +463,7 @@ function resetGame() {
   nightRoles.push("mafia");
   rolesAssigned = false;
   nightSummary.length = 0;
-  previousNightSnapshot = null;
+  historyStack.length = 0;
 
   localStorage.removeItem("mafiaGameData");
   document.getElementById("setup_div").style.display = "flex";
@@ -452,15 +501,15 @@ function loadCheckboxState() {
 
 function saveData() {
   const data = {
-    players: players,
-    currentStage: currentStage,
-    currentRoleIndex: currentRoleIndex,
-    editing: editing,
-    nightRoles: nightRoles,
-    rolesAssigned: rolesAssigned,
-    loversPair: loversPair,
-    nightSummary: nightSummary,
-    previousNightSnapshot: previousNightSnapshot
+    players,
+    currentStage,
+    currentRoleIndex,
+    editing,
+    nightRoles,
+    rolesAssigned,
+    loversPair,
+    nightSummary,
+    historyStack
   };
   localStorage.setItem("mafiaGameData", JSON.stringify(data));
 }
@@ -490,7 +539,11 @@ function loadData() {
     editing = data.editing || false;
     rolesAssigned = data.rolesAssigned || false;
     loversPair = data.loversPair || [];
-    previousNightSnapshot = data.previousNightSnapshot || null;
+
+    if (Array.isArray(data.historyStack)) {
+      historyStack.length = 0;
+      historyStack.push(...data.historyStack);
+    }
 
     if (Array.isArray(data.nightSummary)) {
       nightSummary.length = 0;

@@ -116,6 +116,11 @@ function renderPlayers() {
     const li = document.createElement("li");
     li.className = "player-card";
 
+    // Tab navigation & Accessibility attributes
+    li.tabIndex = 0;
+    li.setAttribute("role", "button");
+    li.setAttribute("aria-label", `Player ${name}, Role: ${players[name].role}`);
+
     const nameSpan = document.createElement("h1");
     const roleSpan = document.createElement("span");
 
@@ -156,11 +161,23 @@ function renderPlayers() {
       roleSpan.classList.remove("revealed");
     };
 
+    // Pointer events
     li.addEventListener("click", () => handleCardClick(name));
     li.addEventListener("pointerdown", showRole);
     li.addEventListener("pointerup", hideRole);
     li.addEventListener("pointerleave", hideRole);
     li.addEventListener("pointercancel", hideRole);
+
+    // Keyboard events for accessibility
+    li.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleCardClick(name);
+      }
+    });
+
+    li.addEventListener("focus", showRole);
+    li.addEventListener("blur", hideRole);
 
     li.appendChild(nameSpan);
     li.appendChild(roleSpan);
@@ -169,6 +186,7 @@ function renderPlayers() {
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "✕";
       deleteBtn.className = "delete-btn";
+      deleteBtn.setAttribute("aria-label", `Delete ${name}`);
       deleteBtn.onclick = (e) => {
         e.stopPropagation();
         deletePlayer(name);

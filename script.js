@@ -8,6 +8,10 @@ let loversPair = [];
 let nightSummary = [];
 const blockedRole = [];
 
+// Phase & Day Tracking
+let dayNumber = 1;
+let isNight = false;
+
 const MAX_HISTORY_DEPTH = 30;
 const historyStack = [];
 
@@ -20,11 +24,39 @@ function saveHistoryState() {
     rolesAssigned,
     loversPair: [...loversPair],
     nightSummary: [...nightSummary],
-    nightRoles: [...nightRoles]
+    nightRoles: [...nightRoles],
+    dayNumber,
+    isNight
   };
   historyStack.push(snapshot);
   if (historyStack.length > MAX_HISTORY_DEPTH) {
     historyStack.shift();
+  }
+}
+
+function updateHeaderUI() {
+  const totalPlayers = Object.keys(players).length;
+  const alivePlayers = Object.values(players).filter(
+    (p) => p.role !== "eliminated"
+  ).length;
+
+  const aliveCountEl = document.getElementById("aliveCount");
+  const totalCountEl = document.getElementById("totalCount");
+  if (aliveCountEl && totalCountEl) {
+    aliveCountEl.textContent = alivePlayers;
+    totalCountEl.textContent = totalPlayers;
+  }
+
+  const phaseBadge = document.getElementById("phaseBadge");
+  if (phaseBadge) {
+    if (currentStage === "SETUP") {
+      phaseBadge.textContent = "SETUP";
+      phaseBadge.classList.remove("night-phase");
+    } else {
+      const phaseName = isNight ? "Night" : "Day";
+      phaseBadge.textContent = `${phaseName} ${dayNumber}`;
+      phaseBadge.classList.toggle("night-phase", isNight);
+    }
   }
 }
 
@@ -53,6 +85,8 @@ function addPlayer() {
 }
 
 function renderPlayers() {
+  updateHeaderUI();
+
   const stageTitle = document.getElementById("stageTitle");
   const roleSubTitle = document.getElementById("roleSubTitle");
 
@@ -116,7 +150,6 @@ function renderPlayers() {
     const li = document.createElement("li");
     li.className = "player-card";
 
-    // Tab navigation & Accessibility attributes
     li.tabIndex = 0;
     li.setAttribute("role", "button");
     li.setAttribute("aria-label", `Player ${name}, Role: ${players[name].role}`);
@@ -161,14 +194,12 @@ function renderPlayers() {
       roleSpan.classList.remove("revealed");
     };
 
-    // Pointer events
     li.addEventListener("click", () => handleCardClick(name));
     li.addEventListener("pointerdown", showRole);
     li.addEventListener("pointerup", hideRole);
     li.addEventListener("pointerleave", hideRole);
     li.addEventListener("pointercancel", hideRole);
 
-    // Keyboard events for accessibility
     li.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -226,6 +257,8 @@ function nextStage() {
       document.getElementById("setup_div").style.display = "none";
       parseInput();
       currentStage = "NIGHT";
+      isNight = true;
+      dayNumber = 1;
       editing = true;
       break;
 
@@ -236,6 +269,7 @@ function nextStage() {
       if (currentRoleIndex >= nightRoles.length) {
         resolveNightActions();
         currentStage = "DAY";
+        isNight = false;
         currentRoleIndex = 0;
         editing = false;
         rolesAssigned = true;
@@ -255,11 +289,15 @@ function nextStage() {
       clearAllTargets();
       nightSummary.length = 0;
       currentStage = "NIGHT";
+      isNight = true;
+      dayNumber++;
       advanceNightRole();
       break;
 
     default:
       currentStage = "SETUP";
+      isNight = false;
+      dayNumber = 1;
       break;
   }
   renderPlayers();
@@ -437,6 +475,8 @@ function previousStage() {
   rolesAssigned = previousState.rolesAssigned;
   loversPair = previousState.loversPair;
   nightSummary = previousState.nightSummary;
+  dayNumber = previousState.dayNumber || 1;
+  isNight = previousState.isNight || false;
 
   nightRoles.length = 0;
   nightRoles.push(...previousState.nightRoles);
@@ -481,6 +521,8 @@ function resetGame() {
 
   currentStage = "SETUP";
   currentRoleIndex = 0;
+  dayNumber = 1;
+  isNight = false;
   editing = false;
   nightRoles.length = 0;
   nightRoles.push("mafia");
@@ -532,7 +574,9 @@ function saveData() {
     rolesAssigned,
     loversPair,
     nightSummary,
-    historyStack
+    historyStack,
+    dayNumber,
+    isNight
   };
   localStorage.setItem("mafiaGameData", JSON.stringify(data));
 }
@@ -562,6 +606,8 @@ function loadData() {
     editing = data.editing || false;
     rolesAssigned = data.rolesAssigned || false;
     loversPair = data.loversPair || [];
+    dayNumber = data.dayNumber || 1;
+    isNight = data.isNight || false;
 
     if (Array.isArray(data.historyStack)) {
       historyStack.length = 0;

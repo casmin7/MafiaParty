@@ -5,6 +5,7 @@
   --bg-color: light-dark(#f4f6f8, #121316);
   --card-bg: light-dark(#ffffff, #1e2025);
   --card-active: light-dark(#e9ecef, #2a2d34);
+  --card-hover: light-dark(#f8f9fa, #252830);
   --text-main: light-dark(#1a1a1e, #e6e8ec);
   --border-color: light-dark(#d0d5dd, #333742);
   --accent-role: light-dark(#9b111e, #e63946);
@@ -45,22 +46,74 @@ body {
   width: 8px;
 }
 
-/* Transparent background track */
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 
-/* Adaptive, nice-looking draggable bar */
 ::-webkit-scrollbar-thumb {
   background: var(--border-color);
-  border-radius: 10px; /* Matches your card-border radius smoothness */
+  border-radius: 10px;
 }
 
-/* Slight opacity boost on hover */
 ::-webkit-scrollbar-thumb:hover {
   filter: brightness(0.8);
 }
 
+/* Header & Counter Layout */
+#game_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.phase-badge {
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background-color: light-dark(#e2e8f0, #2d3748);
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--border-color);
+}
+
+.phase-badge.night-phase {
+  background-color: light-dark(#312e81, #1e1b4b);
+  color: #c7d2fe;
+  border-color: #4338ca;
+}
+
+.player-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+#aliveCount {
+  color: var(--villager-role);
+  font-weight: 700;
+}
+
+#totalCount {
+  opacity: 0.8;
+}
 
 #setup_div {
   display: flex;
@@ -93,6 +146,7 @@ body {
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease,
+    box-shadow 0.15s ease,
     transform 0.05s ease;
   gap: 8px;
 }
@@ -106,12 +160,19 @@ body {
   white-space: nowrap;
 }
 
+@media (hover: hover) {
+  .player-card:hover {
+    background-color: var(--card-hover);
+    border-color: light-dark(#b0b5be, #4f5462);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  }
+}
+
 .player-card:active {
   background-color: var(--card-active);
   transform: scale(0.98);
 }
 
-/* Visibility States */
 .hiddenInfo {
   visibility: hidden;
   user-select: none;
@@ -124,14 +185,13 @@ body {
   visibility: visible;
 }
 
-/* Role & Card States */
 .player-card[data-role="eliminated"] {
   cursor: not-allowed;
   filter: grayscale(100%);
   opacity: 0.45;
   border-color: transparent;
   background-color: var(--eliminated-bg);
-  pointer-events: none; /* Prevents clicks on eliminated cards */
+  pointer-events: none;
 }
 
 .player-card.selected {
@@ -160,36 +220,39 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.15s ease;
 }
 
-/* Visible outline for Keyboard Focus */
+@media (hover: hover) {
+  .delete-btn:hover {
+    background-color: light-dark(rgba(155, 17, 30, 0.15), rgba(230, 57, 70, 0.25));
+  }
+}
+
 .player-card:focus-visible {
+  outline: 2px solid var(--accent-role);
   outline-offset: 2px;
   background-color: var(--card-active);
 }
 
-/* Optional: Ensure delete button inside card also stays focusable */
 .delete-btn:focus-visible {
   outline: 2px solid var(--accent-role);
   border-radius: 4px;
 }
 
-/* Fixed Bottom Controls */
-/* Fixed Bottom Controls Container */
+/* Bottom Controls */
 #bottom_controls {
-    position: fixed;
-    bottom: calc(8px + env(safe-area-inset-bottom));
-    left: 50%;
-    transform: translateX(-50%);
+  position: fixed;
+  bottom: calc(8px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
 
-  /* Use flexbox instead of fixed 3-column grid */
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 
-  /* Responsive Width & Centering */
   width: calc(100% - 16px);
   max-width: 500px;
 
@@ -216,12 +279,18 @@ body {
   font-size: 1rem;
   line-height: 1;
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.05s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
   min-width: 0;
   box-sizing: border-box;
 }
 
-/* Allow middle/action buttons to fill available space evenly */
+@media (hover: hover) {
+  #bottom_controls button:hover {
+    background-color: var(--card-hover);
+    border-color: light-dark(#b0b5be, #4f5462);
+  }
+}
+
 #btn_add_player,
 #btn_edit_toggle,
 #btn_show_log {
@@ -240,8 +309,7 @@ body {
   transform: scale(0.98);
 }
 
-
-/* Grid Layout for Setup */
+/* Setup Grid */
 .setup-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -252,7 +320,7 @@ body {
 .setup-column {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   background-color: var(--card-bg);
   padding: 16px;
   border-radius: 12px;
@@ -260,10 +328,13 @@ body {
 }
 
 .setup-column h3 {
-  margin: 0 0 8px 0;
-  font-size: 1.1rem;
+  margin: 0 0 4px 0;
+  font-size: 0.9rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--text-main);
+  opacity: 0.8;
 }
 
 .placeholder-text {
@@ -272,18 +343,22 @@ body {
   margin: 0;
 }
 
-/* Material 3 Switch Container */
+/* Material 3 Switch */
 .m3-switch-label {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
+  min-height: 44px;
   cursor: pointer;
-  padding: 6px 0;
+  padding: 4px 0;
   user-select: none;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-main);
+  gap: 16px;
 }
 
-/* Hide Native Checkbox */
 .m3-switch {
   position: absolute;
   opacity: 0;
@@ -291,7 +366,6 @@ body {
   height: 0;
 }
 
-/* Switch Track */
 .m3-switch-track {
   position: relative;
   display: inline-block;
@@ -304,7 +378,6 @@ body {
   flex-shrink: 0;
 }
 
-/* Switch Thumb */
 .m3-switch-thumb {
   position: absolute;
   top: 50%;
@@ -317,16 +390,25 @@ body {
   transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1),
               width 0.15s ease,
               height 0.15s ease,
-              background-color 0.2s ease;
+              background-color 0.2s ease,
+              box-shadow 0.2s ease;
 }
 
-/* Checked State Track */
+@media (hover: hover) {
+  .m3-switch-label:hover .m3-switch-track {
+    border-color: var(--text-main);
+  }
+
+  .m3-switch-label:hover .m3-switch-thumb {
+    box-shadow: 0 0 0 8px light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.08));
+  }
+}
+
 .m3-switch:checked + .m3-switch-track {
   background-color: var(--villager-role);
   border-color: var(--villager-role);
 }
 
-/* Checked State Thumb Expansion (M3 spec expands thumb on selection) */
 .m3-switch:checked + .m3-switch-track .m3-switch-thumb {
   transform: translate(18px, -50%);
   width: 24px;
@@ -334,7 +416,80 @@ body {
   background-color: light-dark(#ffffff, #121316);
 }
 
-/* Active Press Scaling Effect */
 .m3-switch-label:active .m3-switch-thumb {
   width: 26px;
+}
+
+/* Header Layout Adjustments */
+#game_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* Removes large gap between title and subtitle */
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-row h1,
+#stageTitle {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+#roleSubTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  opacity: 0.75;
+}
+
+/* Header Right Actions & Badges */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto; /* Forces controls to the right */
+}
+
+.phase-badge {
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background-color: light-dark(#e2e8f0, #2d3748);
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--border-color);
+}
+
+.phase-badge.night-phase {
+  background-color: light-dark(#312e81, #1e1b4b);
+  color: #c7d2fe;
+  border-color: #4338ca;
+}
+
+.player-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  white-space: nowrap;
 }

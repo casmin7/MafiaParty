@@ -25,9 +25,20 @@
   <meta name="theme-color" content="#121316" media="(prefers-color-scheme: dark)" />
 </head>
 <body>
-    <header id="gameHeader">
-      <h2 id="stageTitle">SETUP PHASE</h2>
-      <p id="roleSubTitle">Add players to get started</p>
+    <header id="game_header">
+      <div class="header-left">
+        <div class="title-row">
+          <h1 id="stageTitle">SETUP PHASE</h1>
+          <span id="phaseBadge" class="phase-badge">SETUP</span>
+        </div>
+        <p id="roleSubTitle">Add players to get started</p>
+      </div>
+
+      <div class="header-right">
+        <div class="player-count-badge">
+          Alive: <span id="aliveCount">0</span> / <span id="totalCount">0</span>
+        </div>
+      </div>
     </header>
     <main>
         <ul id="playerList">

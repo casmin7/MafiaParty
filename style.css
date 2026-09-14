@@ -523,3 +523,17 @@ body {
     font-size: 0.85rem;
   }
 }
+
+
+.player-card[draggable="true"] {
+  cursor: grab;
+}
+
+.player-card[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.player-card.dragging {
+  opacity: 0.4;
+  border: 2px solid var(--villager-role);
+}

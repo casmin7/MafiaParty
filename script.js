@@ -12,6 +12,9 @@ const blockedRole = [];
 let dayNumber = 1;
 let isNight = false;
 
+// Drag and Drop Tracking
+let draggedItemKey = null;
+
 const MAX_HISTORY_DEPTH = 30;
 const historyStack = [];
 
@@ -154,6 +157,36 @@ function renderPlayers() {
     li.setAttribute("role", "button");
     li.setAttribute("aria-label", `Player ${name}, Role: ${players[name].role}`);
 
+    if (currentStage === "SETUP") {
+      // Use setAttribute to ensure the attribute exists in DOM for CSS targeting
+      li.setAttribute("draggable", "true");
+
+      li.addEventListener("dragstart", (e) => {
+        draggedItemKey = name;
+        e.dataTransfer.effectAllowed = "move";
+        li.classList.add("dragging");
+      });
+
+      li.addEventListener("dragend", () => {
+        draggedItemKey = null;
+        li.classList.remove("dragging");
+      });
+
+      li.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+      });
+
+      li.addEventListener("drop", (e) => {
+        e.preventDefault();
+        if (!draggedItemKey || draggedItemKey === name) return;
+        reorderPlayers(draggedItemKey, name);
+      });
+    } else {
+      // Ensure draggable attribute is explicitly set to false when active game starts
+      li.setAttribute("draggable", "false");
+    }
+
     const nameSpan = document.createElement("h1");
     const roleSpan = document.createElement("span");
 
@@ -227,6 +260,28 @@ function renderPlayers() {
 
     playerList.appendChild(li);
   }
+}
+
+function reorderPlayers(draggedKey, targetKey) {
+  saveHistoryState();
+
+  const entries = Object.entries(players);
+  const draggedIndex = entries.findIndex(([key]) => key === draggedKey);
+  const targetIndex = entries.findIndex(([key]) => key === targetKey);
+
+  const [removed] = entries.splice(draggedIndex, 1);
+  entries.splice(targetIndex, 0, removed);
+
+  for (const key in players) {
+    delete players[key];
+  }
+
+  entries.forEach(([key, val]) => {
+    players[key] = val;
+  });
+
+  renderPlayers();
+  saveData();
 }
 
 function deletePlayer(playerName) {
@@ -356,19 +411,16 @@ function handleCardClick(playerName) {
   }
 
   if (currentStage === "NIGHT" && !editing) {
-    // Checks if the active role is alive
-    const activeRole = nightRoles[currentRoleIndex];
+    // Check if at least one living player has the active night role
+    const isRoleAlive = Object.values(players).some(
+      (p) => p.role === activeRole
+    );
 
-        // Check if at least one living player has the active night role
-        const isRoleAlive = Object.values(players).some(
-          (p) => p.role === activeRole
-        );
-
-        // If no active living player holds this role, prevent selecting a target
-        if (!isRoleAlive) {
-          alert(`There is no living ${activeRole.toUpperCase()} to select a target!`);
-          return;
-        }
+    // Prevent target selection if role is missing or dead
+    if (!isRoleAlive) {
+      alert(`There is no living ${activeRole.toUpperCase()} to select a target!`);
+      return;
+    }
 
     const actionIndex = players[playerName].affectedBy.indexOf(activeRole);
 
@@ -389,8 +441,22 @@ function resolveNightActions() {
   for (const name in players) {
     const affected = players[name].affectedBy;
     if (affected && affected.includes("escort") && players[name].role !== "none") {
-      nightSummary.push(`${players[name].role} spent a night with the escort`);
+      const targetRole = players[name].role;
+      nightSummary.push(`${targetRole} spent a night with the escort`);
       blockedRole.push(players[name].role);
+
+      const escortDiesSetting = document.getElementById("escortDiesCheckbox")?.checked ?? true;
+
+      // Check if the target is a killer (e.g., mafia)
+      if (targetRole === "mafia" && escortDiesSetting) {
+        // Find the escort player and eliminate them
+        const escortPlayerName = Object.keys(players).find(p => players[p].role === "escort");
+
+        if (escortPlayerName) {
+          players[escortPlayerName].role = "eliminated";
+          nightSummary.push(`The escort (${escortPlayerName}) died after visiting the killer!`);
+        }
+      }
     }
   }
 
@@ -482,8 +548,6 @@ function advanceNightRole() {
   }
 }
 
-
-
 function previousStage() {
   if (historyStack.length === 0) return;
 
@@ -566,7 +630,8 @@ function saveCheckboxState() {
     "escortCheckbox",
     "cupidCheckbox",
     "mutilatorCheckbox",
-
+    "escortDiesCheckbox",
+    "autoAdvanceCheckbox",
   ];
   const checkboxState = {};
   checkboxIds.forEach(id => {

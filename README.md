@@ -47,4 +47,4 @@ You still need people to play with, a space to play and a deck of cards to give 
 
 - Persistent Game State: Automatically saves all game data locally so no progress is lost on page refreshes.
 
-# Try it now at: [mafia.casmin.eu](mafia.casmin.eu)
+# Try it now at: [mafia.casmin.eu](https://mafia.casmin.eu)

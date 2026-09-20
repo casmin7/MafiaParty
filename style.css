@@ -233,6 +233,12 @@ body {
   border-radius: 4px;
 }
 
+.player-card:has(.delete-btn:hover):active,
+.player-card:has(.delete-btn:active):active {
+  transform: scale(1);
+  background-color: var(--card-bg);
+}
+
 /* Bottom Controls */
 #bottom_controls {
   position: fixed;

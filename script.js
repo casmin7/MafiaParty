@@ -87,6 +87,88 @@ function addPlayer() {
   saveData();
 }
 
+function attachSwipeToReveal(card, name, badge) {
+  let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+    let hasMoved = false;
+    const threshold = 50;
+
+    const onStart = (clientX) => {
+      startX = clientX;
+      currentX = clientX;
+      isDragging = true;
+      hasMoved = false;
+      card.dataset.swiping = "false";
+      card.style.transition = "none";
+    };
+
+    const onMove = (clientX) => {
+      if (!isDragging) return;
+      currentX = clientX;
+      const diffX = currentX - startX;
+
+      if (Math.abs(diffX) > 5) {
+        hasMoved = true;
+        card.dataset.swiping = "true";
+        badge.style.opacity = "1";
+        card.parentElement.style.backgroundColor = "var(--card-active)"; // Show container bg
+      }
+
+      if (diffX > 0 && diffX < 120) {
+        card.style.transform = `translateX(${diffX}px)`;
+      }
+    };
+
+    const onEnd = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      card.style.transition = "transform 0.2s ease-out";
+
+      const diffX = currentX - startX;
+
+      if (diffX > threshold) {
+        card.style.transform = `translateX(100px)`;
+        card.classList.add("revealed");
+        badge.style.opacity = "1";
+        card.parentElement.style.backgroundColor = "var(--card-active)"; // Keep visible
+      } else {
+        card.style.transform = `translateX(0px)`;
+        card.classList.remove("revealed");
+        badge.style.opacity = "0";
+        card.parentElement.style.backgroundColor = "transparent"; // Hide if cancelled
+      }
+
+      if (hasMoved) {
+        setTimeout(() => {
+          card.dataset.swiping = "false";
+        }, 100);
+      } else {
+        card.dataset.swiping = "false";
+      }
+    };
+
+  // Touch events
+  card.addEventListener("touchstart", (e) => onStart(e.touches[0].clientX), { passive: true });
+  card.addEventListener("touchmove", (e) => onMove(e.touches[0].clientX), { passive: true });
+  card.addEventListener("touchend", onEnd);
+
+  // Mouse events
+  const onMouseDown = (e) => {
+    onStart(e.clientX);
+    const onMouseMove = (e) => onMove(e.clientX);
+    const onMouseUp = () => {
+      onEnd();
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  card.addEventListener("mousedown", onMouseDown);
+}
+
 function renderPlayers() {
   updateHeaderUI();
 
@@ -101,11 +183,11 @@ function renderPlayers() {
       const activeRole = nightRoles[currentRoleIndex] ? nightRoles[currentRoleIndex].toUpperCase() : "";
       stageTitle.textContent = `NIGHT PHASE — ${activeRole}`;
       roleSubTitle.textContent = editing
-        ? `Tap player to assign ${activeRole} role`
-        : `Tap player to select ${activeRole}'s target`;
+        ? `Tap player to assign ${activeRole} role (Swipe right to check role)`
+        : `Tap player to select ${activeRole}'s target (Swipe right to check role)`;
     } else if (currentStage === "DAY") {
       stageTitle.textContent = "DAY PHASE";
-      roleSubTitle.textContent = "Tap a player card to eliminate them";
+      roleSubTitle.textContent = "Tap to eliminate | Swipe right to check role";
     }
   }
 
@@ -151,101 +233,75 @@ function renderPlayers() {
 
   for (const name in players) {
     const li = document.createElement("li");
-    li.className = "player-card";
+    li.className = "player-card-container";
+    li.style.backgroundColor = "transparent"; // Hide the shadow card by default
+        li.style.transition = "background-color 0.15s ease"; // Smooth fade-in
 
-    li.tabIndex = 0;
-    li.setAttribute("role", "button");
-    li.setAttribute("aria-label", `Player ${name}, Role: ${players[name].role}`);
+    // Underlying role reveal badge
+    const roleBadge = document.createElement("div");
+        roleBadge.className = "role-reveal-badge";
+        roleBadge.textContent = players[name].role;
+        roleBadge.style.opacity = "0"; // Hidden by default
+        roleBadge.style.transition = "opacity 0.15s ease"; // Smooth fade-in
 
-    if (currentStage === "SETUP") {
-      // Use setAttribute to ensure the attribute exists in DOM for CSS targeting
-      li.setAttribute("draggable", "true");
-
-      li.addEventListener("dragstart", (e) => {
-        draggedItemKey = name;
-        e.dataTransfer.effectAllowed = "move";
-        li.classList.add("dragging");
-      });
-
-      li.addEventListener("dragend", () => {
-        draggedItemKey = null;
-        li.classList.remove("dragging");
-      });
-
-      li.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
-      });
-
-      li.addEventListener("drop", (e) => {
-        e.preventDefault();
-        if (!draggedItemKey || draggedItemKey === name) return;
-        reorderPlayers(draggedItemKey, name);
-      });
-    } else {
-      // Ensure draggable attribute is explicitly set to false when active game starts
-      li.setAttribute("draggable", "false");
-    }
-
-    const nameSpan = document.createElement("h1");
-    const roleSpan = document.createElement("span");
-
-    nameSpan.textContent = name;
-    roleSpan.className = "hiddenInfo";
-    roleSpan.textContent = players[name].role;
+        // Interactive card surface
+        const card = document.createElement("div");
+        card.className = "player-card";
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", `Player ${name}, Role: ${players[name].role}`);
 
     const normalizedRole = players[name].role.toLowerCase().trim();
-    li.dataset.role = normalizedRole;
+    card.dataset.role = normalizedRole;
 
     const assignedRole = players[name].role;
     const activeRole = nightRoles[currentRoleIndex];
 
     if (currentStage === "NIGHT" && assignedRole === activeRole) {
-      li.classList.add("selected");
-      roleSpan.classList.add("revealed");
+      card.classList.add("selected");
     } else {
-      li.classList.remove("selected");
-      roleSpan.classList.remove("revealed");
+      card.classList.remove("selected");
     }
 
     if (!editing && currentStage === "NIGHT" && players[name].affectedBy.includes(activeRole)) {
-      li.classList.add("targeted");
+      card.classList.add("targeted");
     } else {
-      li.classList.remove("targeted");
+      card.classList.remove("targeted");
     }
 
-    const showRole = () => {
-      if (currentStage === "DAY") {
-        roleSpan.classList.add("revealed");
-      }
-    };
+    if (currentStage === "SETUP") {
+      card.setAttribute("draggable", "true");
 
-    const hideRole = () => {
-      if (currentStage === "NIGHT" && players[name].role === activeRole) {
-        return;
-      }
-      roleSpan.classList.remove("revealed");
-    };
+      card.addEventListener("dragstart", (e) => {
+        draggedItemKey = name;
+        e.dataTransfer.effectAllowed = "move";
+        card.classList.add("dragging");
+      });
 
-    li.addEventListener("click", () => handleCardClick(name));
-    li.addEventListener("pointerdown", showRole);
-    li.addEventListener("pointerup", hideRole);
-    li.addEventListener("pointerleave", hideRole);
-    li.addEventListener("pointercancel", hideRole);
+      card.addEventListener("dragend", () => {
+        draggedItemKey = null;
+        card.classList.remove("dragging");
+      });
 
-    li.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
+      card.addEventListener("dragover", (e) => {
         e.preventDefault();
-        handleCardClick(name);
-      }
-    });
+        e.dataTransfer.dropEffect = "move";
+      });
 
-    li.addEventListener("focus", showRole);
-    li.addEventListener("blur", hideRole);
+      card.addEventListener("drop", (e) => {
+        e.preventDefault();
+        if (!draggedItemKey || draggedItemKey === name) return;
+        reorderPlayers(draggedItemKey, name);
+      });
+    } else {
+      card.setAttribute("draggable", "false");
+    }
 
-    li.appendChild(nameSpan);
-    li.appendChild(roleSpan);
+    const nameSpan = document.createElement("h1");
+    nameSpan.textContent = name;
+    card.appendChild(nameSpan);
 
+    // Phase-specific elements & attachments
     if (currentStage === "SETUP") {
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "✕";
@@ -255,8 +311,28 @@ function renderPlayers() {
         e.stopPropagation();
         deletePlayer(name);
       };
-      li.appendChild(deleteBtn);
+      card.appendChild(deleteBtn);
+    } else {
+      // Attach swipe gesture during gameplay phases
+      attachSwipeToReveal(card, name, roleBadge);
     }
+
+    // ALWAYS append elements to the DOM regardless of stage
+    li.appendChild(roleBadge);
+    li.appendChild(card);
+
+    // Click & Keyboard interactions
+    card.addEventListener("click", () => {
+      if (card.dataset.swiping === "true") return;
+      handleCardClick(name);
+    });
+
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleCardClick(name);
+      }
+    });
 
     playerList.appendChild(li);
   }
@@ -411,12 +487,10 @@ function handleCardClick(playerName) {
   }
 
   if (currentStage === "NIGHT" && !editing) {
-    // Check if at least one living player has the active night role
     const isRoleAlive = Object.values(players).some(
       (p) => p.role === activeRole
     );
 
-    // Prevent target selection if role is missing or dead
     if (!isRoleAlive) {
       alert(`There is no living ${activeRole.toUpperCase()} to select a target!`);
       return;
@@ -447,9 +521,7 @@ function resolveNightActions() {
 
       const escortDiesSetting = document.getElementById("escortDiesCheckbox")?.checked ?? true;
 
-      // Check if the target is a killer (e.g., mafia)
       if (targetRole === "mafia" && escortDiesSetting) {
-        // Find the escort player and eliminate them
         const escortPlayerName = Object.keys(players).find(p => players[p].role === "escort");
 
         if (escortPlayerName) {

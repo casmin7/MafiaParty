@@ -132,25 +132,19 @@ body {
 
 /* Card Component */
 .player-card {
+  position: relative;
+  z-index: 2; /* Above badge */
   display: flex;
-  min-height: 54px;
-  max-height: 54px;
   justify-content: space-between;
   align-items: center;
   padding: 14px 18px;
-  background-color: var(--card-bg);
+  min-height: 54px;
+  background-color: var(--card-bg); /* Solid background covers badge */
   border: 1px solid var(--border-color);
   border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  cursor: pointer;
+  touch-action: pan-y;
   user-select: none;
-  -webkit-user-select: none;
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease,
-    box-shadow 0.15s ease,
-    transform 0.05s ease;
-  gap: 8px;
+  will-change: transform;
 }
 
 .player-card h1 {
@@ -556,4 +550,36 @@ body {
   opacity: 0.65;
   font-weight: normal;
   white-space: normal;
+}
+
+.player-card-container {
+  position: relative;
+  list-style: none;
+  overflow: hidden;
+  border-radius: 10px;
+  background-color: var(--card-active);
+  min-height: 54px;
+}
+
+.role-reveal-badge {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent-role);
+  z-index: 1; /* Below card */
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.player-card-container:has(.player-card[data-role="eliminated"]) .role-reveal-badge {
+  display: none;
+}
+
+.player-card-container:has(.player-card.targeted) .role-reveal-badge {
+  display: none;
 }

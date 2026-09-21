@@ -296,6 +296,19 @@ body {
   flex: 1;
 }
 
+#edit_status_text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+#edit_status_text svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 #bottom_controls button svg {
   width: 24px;
   height: 24px;

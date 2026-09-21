@@ -669,10 +669,13 @@ function checkWinCondition() {
 
   if (livingMafia === 0) {
     alert("🎉 TOWN WINS! All Mafia members have been eliminated.");
+    if(document.getElementById("resetWinCheckbox")?.checked)resetGame();
+
   } else if (livingMafia >= livingTown) {
     alert("🔪 MAFIA WINS! Mafia members equal or outnumber the Town.");
+    if(document.getElementById("resetWinCheckbox")?.checked)resetGame();
+
   }
-  if(document.getElementById("resetWinCheckbox")?.checked)resetGame();
 }
 
 function resetGame() {

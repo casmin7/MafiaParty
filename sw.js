@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mafia-party-cache-v11';
+const CACHE_NAME = 'mafia-party-cache-v12';
 const ASSETS = [
   '/',
   '/index.html',

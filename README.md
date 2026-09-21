@@ -1,7 +1,7 @@
 # Mafia Party: A helping hand for mafia games
 
 ![badge](https://hackatime.hackclub.com/api/v1/badge/U0ADP8GUBGR/casmin7/MafiaParty)
-![Website](https://img.shields.io/website?url=https%3A%2F%2Fmafia.casmin.eu)
+![https://mafia.casmin.eu](https://img.shields.io/website?url=https%3A%2F%2Fmafia.casmin.eu)
 
 
 

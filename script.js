@@ -401,6 +401,7 @@ function nextStage() {
         editing = false;
         rolesAssigned = true;
         checkWinCondition();
+        if(document.getElementById("resetWinCheckbox")?.checked)resetGame();
       } else {
         const activeRole = nightRoles[currentRoleIndex];
         if (!rolesAssigned) {
@@ -700,6 +701,7 @@ function saveCheckboxState() {
     "mutilatorCheckbox",
     "escortDiesCheckbox",
     "autoAdvanceCheckbox",
+    "resetWinCheckbox"
   ];
   const checkboxState = {};
   checkboxIds.forEach(id => {

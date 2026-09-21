@@ -89,64 +89,60 @@ function addPlayer() {
 
 function attachSwipeToReveal(card, name, badge) {
   let startX = 0;
-    let currentX = 0;
-    let isDragging = false;
-    let hasMoved = false;
-    const threshold = 50;
+  let currentX = 0;
+  let isDragging = false;
+  let hasMoved = false;
 
-    const onStart = (clientX) => {
-      startX = clientX;
-      currentX = clientX;
-      isDragging = true;
-      hasMoved = false;
-      card.dataset.swiping = "false";
-      card.style.transition = "none";
-    };
+  const onStart = (clientX) => {
+    startX = clientX;
+    currentX = clientX;
+    isDragging = true;
+    hasMoved = false;
+    card.dataset.swiping = "false";
+    card.style.transition = "none";
+  };
 
-    const onMove = (clientX) => {
-      if (!isDragging) return;
-      currentX = clientX;
-      const diffX = currentX - startX;
+  const onMove = (clientX) => {
+    if (!isDragging) return;
+    currentX = clientX;
+    const diffX = currentX - startX;
 
-      if (Math.abs(diffX) > 5) {
-        hasMoved = true;
-        card.dataset.swiping = "true";
-        badge.style.opacity = "1";
-        card.parentElement.style.backgroundColor = "var(--card-active)"; // Show container bg
+    if (Math.abs(diffX) > 5) {
+      hasMoved = true;
+      card.dataset.swiping = "true";
+      badge.style.opacity = "1";
+      if (card.parentElement) {
+        card.parentElement.style.backgroundColor = "var(--card-active)";
       }
+    }
 
-      if (diffX > 0 && diffX < 120) {
-        card.style.transform = `translateX(${diffX}px)`;
-      }
-    };
+    // Limit drag movement to the right
+    if (diffX > 0 && diffX < 120) {
+      card.style.transform = `translateX(${diffX}px)`;
+    }
+  };
 
-    const onEnd = () => {
-      if (!isDragging) return;
-      isDragging = false;
-      card.style.transition = "transform 0.2s ease-out";
+  const onEnd = () => {
+    if (!isDragging) return;
+    isDragging = false;
+    card.style.transition = "transform 0.2s ease-out";
 
-      const diffX = currentX - startX;
+    // ALWAYS reset back to closed state upon thumb/mouse release
+    card.style.transform = `translateX(0px)`;
+    card.classList.remove("revealed");
+    badge.style.opacity = "0";
+    if (card.parentElement) {
+      card.parentElement.style.backgroundColor = "transparent";
+    }
 
-      if (diffX > threshold) {
-        card.style.transform = `translateX(100px)`;
-        card.classList.add("revealed");
-        badge.style.opacity = "1";
-        card.parentElement.style.backgroundColor = "var(--card-active)"; // Keep visible
-      } else {
-        card.style.transform = `translateX(0px)`;
-        card.classList.remove("revealed");
-        badge.style.opacity = "0";
-        card.parentElement.style.backgroundColor = "transparent"; // Hide if cancelled
-      }
-
-      if (hasMoved) {
-        setTimeout(() => {
-          card.dataset.swiping = "false";
-        }, 100);
-      } else {
+    if (hasMoved) {
+      setTimeout(() => {
         card.dataset.swiping = "false";
-      }
-    };
+      }, 100);
+    } else {
+      card.dataset.swiping = "false";
+    }
+  };
 
   // Touch events
   card.addEventListener("touchstart", (e) => onStart(e.touches[0].clientX), { passive: true });

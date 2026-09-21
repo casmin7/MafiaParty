@@ -412,7 +412,6 @@ function nextStage() {
         editing = false;
         rolesAssigned = true;
         checkWinCondition();
-        if(document.getElementById("resetWinCheckbox")?.checked)resetGame();
       } else {
         const activeRole = nightRoles[currentRoleIndex];
         if (!rolesAssigned) {
@@ -673,6 +672,7 @@ function checkWinCondition() {
   } else if (livingMafia >= livingTown) {
     alert("🔪 MAFIA WINS! Mafia members equal or outnumber the Town.");
   }
+  if(document.getElementById("resetWinCheckbox")?.checked)resetGame();
 }
 
 function resetGame() {

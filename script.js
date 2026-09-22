@@ -826,38 +826,90 @@ if ('serviceWorker' in navigator) {
 
 
 function enableMobileDragAndDrop(card, playerName) {
+  let activeContainer = null;
+
   card.addEventListener("touchstart", (e) => {
-    // Ignore drag if tapping the delete button
+    // Ignore drag when tapping action buttons like delete
     if (e.target.closest(".delete-btn")) return;
+
+    activeContainer = card.closest(".player-card-container");
+    if (!activeContainer) return;
 
     draggedItemKey = playerName;
     card.classList.add("dragging");
-    document.body.style.overflow = "hidden"; // Prevent scrolling while dragging
-  }, { passive: false });
+
+    // Prevent page scrolling while reordering items
+    document.body.style.overflow = "hidden";
+  }, { passive: true });
 
   card.addEventListener("touchmove", (e) => {
-    if (!draggedItemKey) return;
+    if (!draggedItemKey || !activeContainer) return;
+
+    // Prevent screen scroll gesture while dragging
+    if (e.cancelable) e.preventDefault();
 
     const touch = e.touches[0];
     const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-    const targetCard = elementBelow?.closest(".player-card");
+    const targetContainer = elementBelow?.closest(".player-card-container");
 
-    if (targetCard && targetCard !== card) {
-      // Find target player name from target element's header
-      const targetName = targetCard.querySelector("h1")?.textContent;
-      if (targetName && targetName !== draggedItemKey) {
-        reorderPlayers(draggedItemKey, targetName);
+    // Swap list elements directly in the DOM without re-rendering the app state
+    if (targetContainer && targetContainer !== activeContainer) {
+      const list = activeContainer.parentElement;
+      if (!list) return;
+
+      const children = Array.from(list.children);
+      const currentIndex = children.indexOf(activeContainer);
+      const targetIndex = children.indexOf(targetContainer);
+
+      if (currentIndex < targetIndex) {
+        list.insertBefore(activeContainer, targetContainer.nextSibling);
+      } else {
+        list.insertBefore(activeContainer, targetContainer);
       }
     }
   }, { passive: false });
 
   const onTouchEnd = () => {
-    if (!draggedItemKey) return;
+    if (!draggedItemKey || !activeContainer) return;
+
     card.classList.remove("dragging");
+    document.body.style.overflow = "";
+
+    // Sync JavaScript state and local storage once touch releases
+    finalizeDomReorder();
+
     draggedItemKey = null;
-    document.body.style.overflow = ""; // Re-enable scrolling
+    activeContainer = null;
   };
 
   card.addEventListener("touchend", onTouchEnd);
   card.addEventListener("touchcancel", onTouchEnd);
+}
+
+function finalizeDomReorder() {
+  const playerList = document.getElementById("playerList");
+  if (!playerList) return;
+
+  const newPlayers = {};
+  const containers = playerList.querySelectorAll(".player-card-container");
+
+  containers.forEach((container) => {
+    const nameHeader = container.querySelector("h1");
+    if (nameHeader) {
+      const name = nameHeader.textContent.trim();
+      if (players[name]) {
+        newPlayers[name] = players[name];
+      }
+    }
+  });
+
+  saveHistoryState();
+
+  // Rebuild players object matching final DOM list sequence
+  for (const name in players) {
+    delete players[name];
+  }
+  Object.assign(players, newPlayers);
+
+  saveData();
 }

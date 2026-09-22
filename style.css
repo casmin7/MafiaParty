@@ -540,6 +540,7 @@ body {
 
 .player-card[draggable="true"] {
   cursor: grab;
+  touch-action: pan-y;
 }
 
 .player-card[draggable="true"]:active {
@@ -548,7 +549,9 @@ body {
 
 .player-card.dragging {
   opacity: 0.4;
-  border: 2px solid var(--villager-role);
+  border: 2px dashed var(--villager-role);
+  touch-action: none;
+  z-index: 1000;
 }
 
 .switch-label-group {

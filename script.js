@@ -300,6 +300,8 @@ function renderPlayers() {
         if (!draggedItemKey || draggedItemKey === name) return;
         reorderPlayers(draggedItemKey, name);
       });
+
+      enableMobileDragAndDrop(card, name);
     } else {
       card.setAttribute("draggable", "false");
     }
@@ -820,4 +822,42 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(err => console.error(err));
   });
+}
+
+
+function enableMobileDragAndDrop(card, playerName) {
+  card.addEventListener("touchstart", (e) => {
+    // Ignore drag if tapping the delete button
+    if (e.target.closest(".delete-btn")) return;
+
+    draggedItemKey = playerName;
+    card.classList.add("dragging");
+    document.body.style.overflow = "hidden"; // Prevent scrolling while dragging
+  }, { passive: false });
+
+  card.addEventListener("touchmove", (e) => {
+    if (!draggedItemKey) return;
+
+    const touch = e.touches[0];
+    const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+    const targetCard = elementBelow?.closest(".player-card");
+
+    if (targetCard && targetCard !== card) {
+      // Find target player name from target element's header
+      const targetName = targetCard.querySelector("h1")?.textContent;
+      if (targetName && targetName !== draggedItemKey) {
+        reorderPlayers(draggedItemKey, targetName);
+      }
+    }
+  }, { passive: false });
+
+  const onTouchEnd = () => {
+    if (!draggedItemKey) return;
+    card.classList.remove("dragging");
+    draggedItemKey = null;
+    document.body.style.overflow = ""; // Re-enable scrolling
+  };
+
+  card.addEventListener("touchend", onTouchEnd);
+  card.addEventListener("touchcancel", onTouchEnd);
 }

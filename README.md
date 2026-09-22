@@ -3,6 +3,7 @@
 ![badge](https://hackatime.hackclub.com/api/v1/badge/U0ADP8GUBGR/casmin7/MafiaParty)
 ![https://mafia.casmin.eu](https://img.shields.io/website?url=https%3A%2F%2Fmafia.casmin.eu)
 
+![demo-image](https://github.com/user-attachments/assets/04d67982-baf9-4a27-bcf9-a48c66f8590d)
 
 
 ## What it is:

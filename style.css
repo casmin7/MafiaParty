@@ -548,7 +548,7 @@ body {
 }
 
 .player-card.dragging {
-  opacity: 0.4;
+  opacity: 0.6;
   border: 2px dashed var(--villager-role);
   touch-action: none;
   z-index: 1000;
